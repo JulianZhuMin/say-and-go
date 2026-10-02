@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#74c0fc"/><stop offset=".62" stop-color="#d0ebff"/><stop offset=".62" stop-color="#4dabf7"/><stop offset="1" stop-color="#1c7ed6"/></linearGradient></defs>
+  <rect width="512" height="512" fill="url(#g)"/>
+  <circle cx="420" cy="92" r="42" fill="#ffd43b"/>
+  <!-- speech bubble with microphone -->
+  <path d="M96 60 H300 Q330 60 330 90 V190 Q330 220 300 220 H170 L120 262 L132 220 H96 Q66 220 66 190 V90 Q66 60 96 60 Z" fill="#fff" stroke="#1864ab" stroke-width="10" stroke-linejoin="round"/>
+  <rect x="176" y="84" width="44" height="80" rx="22" fill="#e03131"/>
+  <path d="M158 132 Q158 186 198 186 Q238 186 238 132 M198 186 V206" fill="none" stroke="#1864ab" stroke-width="10" stroke-linecap="round"/>
+  <!-- little plane -->
+  <g transform="translate(250 250) scale(1.05)">
+    <path d="M34 66 L16 22 Q14 14 23 14 L40 14 Q47 14 51 21 L80 62 Z" fill="#ff6b6b" stroke="#c92a2a" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M22 62 Q22 54 36 54 L166 54 Q204 54 208 78 Q204 102 166 102 L42 102 Q24 102 22 86 Z" fill="#fff" stroke="#1864ab" stroke-width="5"/>
+    <g fill="#4dabf7"><circle cx="66" cy="72" r="8"/><circle cx="92" cy="72" r="8"/><circle cx="118" cy="72" r="8"/><circle cx="144" cy="72" r="8"/></g>
+    <path d="M100 84 L74 128 Q72 134 80 134 L98 134 Q104 134 108 128 L146 86 Z" fill="#ffd43b" stroke="#e67700" stroke-width="5" stroke-linejoin="round"/>
+  </g>
+  <!-- waves -->
+  <path d="M0 440 q32 -22 64 0 t64 0 t64 0 t64 0 t64 0 t64 0 t64 0 t64 0 V512 H0 Z" fill="#1864ab" opacity=".55"/>
+</svg>
