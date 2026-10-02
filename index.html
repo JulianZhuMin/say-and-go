@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Say &amp; Go 講聲即郁</title>
-<meta name="description" content="講「飛機」、「火車」、「電單車」或者「消防車」，睇佢出發！ Say plane, train, motorbike or fire truck and watch it go. A voice game for toddlers.">
-<meta name="app-version" content="2026-10-01c-firetruck">
+<meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」或者「消防車」，睇佢出發！ Say the Cantonese name of the plane, MTR, bus, motorbike or fire truck and watch it go. A voice game for toddlers.">
+<meta name="app-version" content="2026-10-03b-5vehicles-babytalk-hiugaai">
 <meta name="theme-color" content="#4dabf7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -99,20 +99,24 @@
   }
   #cover-title .en { font-size: .6em; color: #364fc7; margin-left: .4em; display: inline-block; }
   .cover-hint { margin: 0; text-align: center; font-weight: 800; color: #364fc7; font-size: clamp(14px, 3vmin, 24px); }
-  /* Play area: the FOUR vehicle cards sit in a 2x2 arrangement AROUND the big listening microphone, which has its own
-     empty grid cell in the exact centre (absolutely positioned over that cell, so it never covers a card; pointer-events:none). */
+  /* Play area: the FIVE vehicle cards sit AROUND the big listening microphone, which has its own empty grid cell
+     (absolutely positioned over that cell, so it never covers a card; pointer-events:none).
+     landscape / iPad / computer (3 x 2):   plane | MIC  | mtr
+                                            bus   | fire | moto      (the microphone is the top-centre cell)
+     portrait phones (2 columns):           plane | mtr
+                                            --- MIC ---
+                                            bus   | moto
+                                            -- fire ---               */
   .play { flex: 1; min-height: 0; width: 100%; max-width: 1400px; position: relative; display: flex; --gap: 3vmin; }
   .tiles {
     flex: 1; min-height: 0; width: 100%; list-style: none; margin: 0; padding: 0;
     display: grid; gap: var(--gap);
-    /* landscape / iPad / computer:  plane | MIC | train
-                                     moto  | MIC | fire   */
-    grid-template-columns: minmax(0, 1fr) minmax(0, .62fr) minmax(0, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-template-rows: repeat(2, minmax(0, 1fr));
-    grid-template-areas: "plane mic train" "moto mic fire";
+    grid-template-areas: "plane mic mtr" "bus fire moto";
   }
   .tiles li { min-height: 0; min-width: 0; display: flex; }
-  .tiles li.slot-plane { grid-area: plane; } .tiles li.slot-train { grid-area: train; }
+  .tiles li.slot-plane { grid-area: plane; } .tiles li.slot-mtr { grid-area: mtr; } .tiles li.slot-bus { grid-area: bus; }
   .tiles li.slot-moto { grid-area: moto; } .tiles li.slot-fire { grid-area: fire; }
   .tile {
     flex: 1; min-height: 0; min-width: 0; border: 0; cursor: pointer; border-radius: 5vmin;
@@ -125,22 +129,25 @@
   .tile .pic { flex: 1; min-height: 0; width: 100%; display: flex; align-items: center; justify-content: center; transition: opacity .25s ease; }
   .tile .pic svg { width: 100%; height: 100%; max-height: 100%; display: block; overflow: visible; }
   .tile .label { display: flex; flex-direction: column; align-items: center; line-height: 1.05; }
-  .tile .label .zh { font-size: clamp(26px, 7vmin, 70px); font-weight: 900; }
-  .tile .label .en { font-size: clamp(14px, 3vmin, 28px); font-weight: 800; opacity: .75; }
+  .tile .label .zh { font-size: clamp(24px, 6.4vmin, 64px); font-weight: 900; }
+  .tile .label .en { font-size: clamp(13px, 2.8vmin, 26px); font-weight: 800; opacity: .75; }
   .tile[data-v="plane"] { background: linear-gradient(180deg, #fff 0%, #e7f5ff 100%); color: #1864ab; }
-  .tile[data-v="train"] { background: linear-gradient(180deg, #fff 0%, #fff4e6 100%); color: #c92a2a; }
+  .tile[data-v="mtr"]   { background: linear-gradient(180deg, #fff 0%, #f1f3f5 100%); color: #c92a2a; }
+  .tile[data-v="bus"]   { background: linear-gradient(180deg, #fff 0%, #fff9db 100%); color: #a61e1e; }
   .tile[data-v="moto"]  { background: linear-gradient(180deg, #fff 0%, #fff0f6 100%); color: #a61e4d; }
   .tile[data-v="fire"]  { background: linear-gradient(180deg, #fff 0%, #ffe3e3 100%); color: #b02525; }
-  /* Portrait phones / iPad portrait:  plane | train
-                                       ---- MIC ----
-                                       moto  | fire  */
   @media (max-aspect-ratio: 4/5) {
-    .play { --gap: 2vh; --mic-row: clamp(110px, 23vh, 330px); }
-    .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr) var(--mic-row) minmax(0, 1fr);
-      grid-template-areas: "plane train" "mic mic" "moto fire"; }
-    .tile { border-radius: 4vh; padding: 1.2vh 2.5vw; gap: .5vh; }
-    .tile .label .zh { font-size: clamp(26px, 9vw, 64px); }
-    .tile .label .en { font-size: clamp(13px, 4vw, 28px); }
+    .play { --gap: 1.6vh; --mic-row: clamp(96px, 17vh, 280px); }
+    .tiles { grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: minmax(0, 1fr) var(--mic-row) minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas: "plane mtr" "mic mic" "bus moto" "fire fire"; }
+    .tile { border-radius: 3.4vh; padding: 1vh 2.5vw; gap: .4vh; }
+    .tile .label .zh { font-size: clamp(24px, 8vw, 58px); }
+    .tile .label .en { font-size: clamp(12px, 3.6vw, 26px); }
+    .tiles li.slot-fire .tile { flex-direction: row; gap: 3vw; }          /* the wide bottom card: picture beside its name */
+    .tiles li.slot-fire .tile .pic { flex: 0 1 auto; width: auto; height: 100%; aspect-ratio: 260 / 150; }
+    .tiles li.slot-fire .tile .label { flex: 0 0 auto; } .tiles li.slot-fire .tile .label .zh { white-space: nowrap; }
+    .tiles li.slot-fire .tile .pic { min-width: 0; max-width: 62%; }
   }
   /* Short landscape (phone on its side): less empty space above, so the cards and the microphone stay big */
   @media (min-aspect-ratio: 4/5) and (max-height: 520px) {
@@ -174,17 +181,17 @@
   #mic-ind[data-s="tap"] .dot { background: #40c057; }
   @keyframes dot-pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(250,82,82,.6); } 50% { transform: scale(1.15); box-shadow: 0 0 0 8px rgba(250,82,82,0); } }
   /* Big see-through TOY MICROPHONE: shown ONLY while speech recognition is actually running (the child's turn to talk).
-     It sits in the centre of the play area, in its own empty grid cell between the vehicle cards, so it never covers
+     It sits in the middle of the play area, in its own empty grid cell between the vehicle cards, so it never covers
      a card; pointer-events:none so it can never block a tap either. Hidden during trips, so it never covers an animation. */
   #mic-big {
     position: absolute; z-index: 3; pointer-events: none;
-    /* landscape: the middle column (columns 1fr | .62fr | 1fr), full height = exact centre */
-    left: calc((100% - 2 * var(--gap)) / 2.62 + var(--gap)); width: calc((100% - 2 * var(--gap)) * .62 / 2.62);
-    top: 0; height: 100%;
+    /* landscape: the top-centre cell of the 3 x 2 grid */
+    left: calc((100% - 2 * var(--gap)) / 3 + var(--gap)); width: calc((100% - 2 * var(--gap)) / 3);
+    top: 0; height: calc((100% - var(--gap)) / 2);
     display: flex; align-items: center; justify-content: center;
   }
   @media (max-aspect-ratio: 4/5) {   /* portrait: the full-width middle row (exact centre of the play area) */
-    #mic-big { left: 0; width: 100%; top: calc((100% - var(--mic-row)) / 2); height: var(--mic-row); }
+    #mic-big { left: 0; width: 100%; top: calc((100% - var(--mic-row) - 3 * var(--gap)) / 3 + var(--gap)); height: var(--mic-row); }
   }
   #mic-big svg { height: 100%; width: 100%; max-width: 100%; display: block; overflow: visible;
     filter: drop-shadow(0 1.2vmin 1.4vmin rgba(28,61,143,.28));
@@ -222,11 +229,11 @@
   #stage { position: fixed; inset: 0; z-index: 4; pointer-events: none; overflow: hidden; }
   #stage .scene, #stage .mover { display: none; }
   #stage[data-v="plane"] .scene-plane, #stage[data-v="plane"] .mover-plane,
-  #stage[data-v="train"] .scene-train, #stage[data-v="train"] .mover-train,
+  #stage[data-v="mtr"] .scene-mtr, #stage[data-v="mtr"] .mover-mtr,
+  #stage[data-v="bus"] .scene-bus, #stage[data-v="bus"] .mover-bus,
   #stage[data-v="moto"] .scene-moto, #stage[data-v="moto"] .mover-moto,
   #stage[data-v="fire"] .scene-fire, #stage[data-v="fire"] .mover-fire { display: block; }
   .scene { position: absolute; inset: 0; animation: scene-in 4s ease both; }
-  .scene-train { animation-duration: 2.8s; }
   @keyframes scene-in { 0% { opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { opacity: 0; } }
   .mover svg { width: 100%; height: 100%; display: block; overflow: visible; }
   .tile-only { display: none; }
@@ -261,28 +268,65 @@
   #stage .prop { transform-box: view-box; transform-origin: 213px 78px; animation: prop-spin .09s linear infinite alternate; }
   @keyframes prop-spin { from { transform: scaleY(1); } to { transform: scaleY(.15); } }
 
-  /* Train: crosses the screen left to right, carriages bob 一卡一卡, wheels turn, smoke puffs */
-  .scene-train { background: linear-gradient(180deg, rgba(255,255,255,0) 40%, rgba(211,249,216,.6) 100%); }
-  .hills { position: absolute; left: -10%; right: -10%; bottom: 0; height: 30vh; background:
-      radial-gradient(ellipse 30% 70% at 20% 100%, #8ce99a 98%, transparent 100%),
-      radial-gradient(ellipse 35% 60% at 70% 100%, #69db7c 98%, transparent 100%); }
-  .rails { position: absolute; left: 0; right: 0; bottom: calc(20vh - 18px); height: 18px;
-    background: linear-gradient(#868e96 0 4px, transparent 4px 14px, #868e96 14px 18px),
-      repeating-linear-gradient(90deg, #8d5524 0 12px, transparent 12px 36px); }
-  .mover-train {
-    position: absolute; left: 0; bottom: 20vh;
-    width: min(150vw, 100vh); height: calc(min(150vw, 100vh) * 172 / 520);
-    animation: cross 2.8s cubic-bezier(.25,.1,.35,1) both;
-  }
-  @keyframes cross { from { transform: translateX(-100%); } to { transform: translateX(100vw); } }
-  #stage .car { animation: chug .6s ease-out infinite; }
-  #stage .car2 { animation-delay: -.2s; } #stage .car1 { animation-delay: -.4s; }
-  @keyframes chug { 0%, 100% { transform: translateY(0); } 18% { transform: translateY(-7px); } 36% { transform: translateY(0); } 58% { transform: translateY(-3px); } 72% { transform: translateY(0); } }
+  /* shared: wheels turn, exhaust puffs */
   #stage .wheel { transform-box: fill-box; transform-origin: center; animation: spin .6s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   #stage .puff { transform-box: fill-box; transform-origin: center; animation: puff 1.2s ease-out infinite; opacity: 0; }
   #stage .puff.p2 { animation-delay: .4s; } #stage .puff.p3 { animation-delay: .8s; }
   @keyframes puff { 0% { opacity: .9; transform: translate(0, 10px) scale(.4); } 100% { opacity: 0; transform: translate(-40px, -40px) scale(1.6); } }
+
+  /* MTR (地鐵): glides in along a raised track, slows and stops in the middle, the doors slide open and shut
+     (with the "do-di" door chime), then glides off to the right. City skyline behind. */
+  .scene-mtr { background: linear-gradient(180deg, rgba(255,255,255,0) 20%, rgba(208,235,255,.6) 70%); animation-duration: 4.2s; }
+  .skyline { position: absolute; left: -10%; right: -10%; bottom: 30vh; height: 34vmin; animation: tree-drift 4.2s linear both;
+    background:
+      linear-gradient(#b2bec3, #b2bec3) 4% 100% / 9% 70% no-repeat, linear-gradient(#ced4da, #ced4da) 15% 100% / 8% 45% no-repeat,
+      linear-gradient(#adb5bd, #adb5bd) 27% 100% / 10% 90% no-repeat, linear-gradient(#ced4da, #ced4da) 40% 100% / 7% 55% no-repeat,
+      linear-gradient(#b2bec3, #b2bec3) 52% 100% / 11% 75% no-repeat, linear-gradient(#dee2e6, #dee2e6) 66% 100% / 8% 50% no-repeat,
+      linear-gradient(#adb5bd, #adb5bd) 78% 100% / 9% 85% no-repeat, linear-gradient(#ced4da, #ced4da) 92% 100% / 10% 60% no-repeat; }
+  .viaduct { position: absolute; left: 0; right: 0; bottom: 0; height: 30vh;
+    background: linear-gradient(#868e96 0 2.4vh, #adb5bd 2.4vh 5.4vh, transparent 5.4vh),
+      repeating-linear-gradient(90deg, transparent 0 14vw, #adb5bd 14vw 18vw) 0 5.4vh / 100% 100% no-repeat; }
+  .mover-mtr {
+    position: absolute; left: 0; bottom: calc(30vh - 1vh);
+    width: min(100vmin, 760px); height: calc(min(100vmin, 760px) * 150 / 300);
+    animation: mtr-glide 4.2s both;
+  }
+  @keyframes mtr-glide {
+    0%   { transform: translateX(-100%); animation-timing-function: cubic-bezier(.15,.6,.3,1); }
+    30%  { transform: translateX(calc(50vw - 50%)); }
+    66%  { transform: translateX(calc(50vw - 50%)); animation-timing-function: cubic-bezier(.6,0,.9,.5); }
+    100% { transform: translateX(100vw); }
+  }
+  #stage .mtr-wheel { animation: spin .5s linear infinite; }
+  #stage .door-l { animation: door-l 4.2s ease-in-out both; } #stage .door-r { animation: door-r 4.2s ease-in-out both; }
+  @keyframes door-l { 0%, 36% { transform: translateX(0); } 42%, 56% { transform: translateX(-11px); } 62%, 100% { transform: translateX(0); } }
+  @keyframes door-r { 0%, 36% { transform: translateX(0); } 42%, 56% { transform: translateX(11px); } 62%, 100% { transform: translateX(0); } }
+  #stage .mtr-body { animation: fire-rock .5s ease-in-out infinite alternate; }
+
+  /* Bus (巴士): a Hong Kong double-decker drives in, pulls up at the bus stop (ding-ding bell, a little bounce),
+     toots its horn and drives off to the right. Wheels turn, exhaust puffs. */
+  .scene-bus { background: linear-gradient(180deg, rgba(255,255,255,0) 30%, rgba(255,243,191,.5) 70%); animation-duration: 4.2s; }
+  .scene-bus .road { height: 22vh; }
+  .scene-bus .road-line { animation: none; }
+  .bus-stop { position: absolute; left: 58%; bottom: 22vh; width: 1.4vmin; height: 30vmin; background: #495057; border-radius: 1vmin; }
+  .bus-stop::before { content: ""; position: absolute; left: -4vmin; top: -1vmin; width: 9.4vmin; height: 7vmin; background: #fab005; border: .6vmin solid #fff; border-radius: 1.4vmin; box-shadow: 0 .4vmin 1vmin rgba(0,0,0,.2); }
+  .mover-bus {
+    position: absolute; left: 0; bottom: 11vh;
+    width: min(70vmin, 540px); height: calc(min(70vmin, 540px) * 170 / 240);
+    animation: bus-drive 4.2s both;
+  }
+  @keyframes bus-drive {
+    0%   { transform: translateX(-100%); animation-timing-function: cubic-bezier(.2,.6,.35,1); }
+    32%  { transform: translateX(calc(50vw - 50%)); }
+    62%  { transform: translateX(calc(50vw - 50%)); animation-timing-function: cubic-bezier(.55,0,.85,.6); }
+    100% { transform: translateX(100vw); }
+  }
+  #stage .bus-tilt { width: 100%; height: 100%; transform-origin: 75% 95%; animation: bus-tilt 4.2s linear both; }
+  @keyframes bus-tilt { 0%, 30% { transform: rotate(0deg); } 33% { transform: rotate(1.4deg); } 37%, 61% { transform: rotate(0deg); }
+    65% { transform: rotate(-1deg); } 70%, 100% { transform: rotate(0deg); } }
+  #stage .bus-body { animation: fire-rock .3s ease-in-out infinite alternate; }
+  #stage .bus-wheel { animation-duration: .55s; }
 
   /* Motorbike: zooms in from the left, stops in the middle to rev "vroom vroom" (shaking), then pops a little
      wheelie and races off to the right. Wheels spin, exhaust puffs, speed lines. Same timing as the engine sound. */
@@ -425,8 +469,9 @@
     #stage .scene, #stage .scene *, #stage .mover * { animation: none !important; }
     #stage .scene { animation: rm-fade var(--dur, 3s) ease both !important; }
     #stage .mover { animation: rm-fade var(--dur, 3s) ease both !important; transform: none !important; }
-    #stage .mover-train, #stage .mover-moto, #stage .mover-fire { left: 50%; }
-    #stage .mover-train { width: min(96vw, 100vh); height: calc(min(96vw, 100vh) * 172 / 520); margin-left: calc(min(96vw, 100vh) / -2); }
+    #stage .mover-mtr, #stage .mover-bus, #stage .mover-moto, #stage .mover-fire { left: 50%; }
+    #stage .mover-mtr { margin-left: calc(min(100vmin, 760px) / -2); }
+    #stage .mover-bus { margin-left: calc(min(70vmin, 540px) / -2); }
     #stage .mover-moto { margin-left: calc(min(64vmin, 500px) / -2); }
     #stage .mover-fire { margin-left: calc(min(78vmin, 600px) / -2); }
     .arm-wave { animation-duration: 1.8s; }
@@ -463,54 +508,76 @@
         <circle cx="210" cy="78" r="7" fill="#ffd43b" stroke="#e67700" stroke-width="3"/>
       </symbol>
 
-      <symbol id="art-train" viewBox="0 0 520 172">
-        <rect class="tile-only" x="0" y="166" width="520" height="6" rx="3" fill="#868e96"/>
-        <!-- carriage 1 (yellow) -->
-        <g class="car car1">
-          <rect x="10" y="62" width="138" height="84" rx="14" fill="#ffd43b" stroke="#e67700" stroke-width="4"/>
-          <rect x="4" y="50" width="150" height="16" rx="8" fill="#f76707"/>
-          <g fill="#e7f5ff" stroke="#e67700" stroke-width="3">
-            <rect x="24" y="78" width="32" height="30" rx="8"/><rect x="63" y="78" width="32" height="30" rx="8"/><rect x="102" y="78" width="32" height="30" rx="8"/>
+      <symbol id="art-mtr" viewBox="0 0 300 150">
+        <!-- a Hong Kong MTR train, facing right: white body, red + blue stripes, sliding doors, smiling front window -->
+        <rect class="tile-only" x="0" y="142" width="300" height="6" rx="3" fill="#868e96"/>
+        <g class="mtr-body">
+          <path d="M150 30 L166 14 L184 30 M156 14 H178" stroke="#495057" stroke-width="3.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+          <path d="M8 42 Q8 30 20 30 H238 Q280 30 292 72 L294 112 Q294 124 282 124 H20 Q8 124 8 112 Z" fill="#f8f9fa" stroke="#495057" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M16 38 H246" stroke="#dee2e6" stroke-width="5" stroke-linecap="round"/>
+          <path d="M10 94 H293" stroke="#e03131" stroke-width="10"/>
+          <path d="M10 105 H293" stroke="#1c7ed6" stroke-width="4"/>
+          <g fill="#a5d8ff" stroke="#495057" stroke-width="3">
+            <rect x="20" y="48" width="34" height="30" rx="6"/><rect x="128" y="48" width="34" height="30" rx="6"/>
           </g>
-          <g class="wheel"><circle cx="44" cy="150" r="16" fill="#343a40"/><path d="M31 150 H57 M44 137 V163" stroke="#ced4da" stroke-width="3"/><circle cx="44" cy="150" r="5" fill="#ffd43b"/></g>
-          <g class="wheel"><circle cx="114" cy="150" r="16" fill="#343a40"/><path d="M101 150 H127 M114 137 V163" stroke="#ced4da" stroke-width="3"/><circle cx="114" cy="150" r="5" fill="#ffd43b"/></g>
+          <!-- doors: two pairs (they slide open at the station) -->
+          <g class="door-l"><rect x="60" y="44" width="24" height="76" rx="3" fill="#e9ecef" stroke="#495057" stroke-width="3"/><rect x="65" y="52" width="14" height="26" rx="3" fill="#a5d8ff"/></g>
+          <g class="door-r"><rect x="84" y="44" width="24" height="76" rx="3" fill="#e9ecef" stroke="#495057" stroke-width="3"/><rect x="89" y="52" width="14" height="26" rx="3" fill="#a5d8ff"/></g>
+          <g class="door-l"><rect x="168" y="44" width="24" height="76" rx="3" fill="#e9ecef" stroke="#495057" stroke-width="3"/><rect x="173" y="52" width="14" height="26" rx="3" fill="#a5d8ff"/></g>
+          <g class="door-r"><rect x="192" y="44" width="24" height="76" rx="3" fill="#e9ecef" stroke="#495057" stroke-width="3"/><rect x="197" y="52" width="14" height="26" rx="3" fill="#a5d8ff"/></g>
+          <!-- front window with a happy face -->
+          <path d="M228 42 H250 Q274 44 284 74 H228 Z" fill="#a5d8ff" stroke="#495057" stroke-width="3" stroke-linejoin="round"/>
+          <circle cx="248" cy="58" r="4.5" fill="#1d1d1f"/><circle cx="264" cy="60" r="4.5" fill="#1d1d1f"/>
+          <circle cx="246.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="262.5" cy="58.5" r="1.6" fill="#fff"/>
+          <path d="M244 80 q13 9 27 0" stroke="#1d1d1f" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+          <circle cx="238" cy="80" r="5" fill="#ff8787" opacity=".8"/>
+          <circle cx="285" cy="86" r="4.5" fill="#ffd43b" stroke="#e67700" stroke-width="2"/>
         </g>
-        <rect x="146" y="126" width="24" height="8" rx="3" fill="#495057"/>
-        <!-- carriage 2 (green) -->
-        <g class="car car2">
-          <rect x="168" y="62" width="138" height="84" rx="14" fill="#69db7c" stroke="#2b8a3e" stroke-width="4"/>
-          <rect x="162" y="50" width="150" height="16" rx="8" fill="#2f9e44"/>
-          <g fill="#e7f5ff" stroke="#2b8a3e" stroke-width="3">
-            <rect x="182" y="78" width="32" height="30" rx="8"/><rect x="221" y="78" width="32" height="30" rx="8"/><rect x="260" y="78" width="32" height="30" rx="8"/>
+        <!-- bogies + wheels -->
+        <rect x="26" y="122" width="62" height="8" rx="4" fill="#495057"/><rect x="190" y="122" width="62" height="8" rx="4" fill="#495057"/>
+        <g class="wheel mtr-wheel"><circle cx="40" cy="132" r="10" fill="#343a40"/><circle cx="40" cy="132" r="3.5" fill="#ced4da"/><path d="M32 132 H48" stroke="#868e96" stroke-width="2.5"/></g>
+        <g class="wheel mtr-wheel"><circle cx="74" cy="132" r="10" fill="#343a40"/><circle cx="74" cy="132" r="3.5" fill="#ced4da"/><path d="M66 132 H82" stroke="#868e96" stroke-width="2.5"/></g>
+        <g class="wheel mtr-wheel"><circle cx="204" cy="132" r="10" fill="#343a40"/><circle cx="204" cy="132" r="3.5" fill="#ced4da"/><path d="M196 132 H212" stroke="#868e96" stroke-width="2.5"/></g>
+        <g class="wheel mtr-wheel"><circle cx="238" cy="132" r="10" fill="#343a40"/><circle cx="238" cy="132" r="3.5" fill="#ced4da"/><path d="M230 132 H246" stroke="#868e96" stroke-width="2.5"/></g>
+      </symbol>
+
+      <symbol id="art-bus" viewBox="0 0 240 170">
+        <!-- a Hong Kong double-decker bus, facing right: red with a cream top deck, two children upstairs, a smiling driver -->
+        <rect class="tile-only" x="2" y="162" width="236" height="6" rx="3" fill="#868e96"/>
+        <g class="stage-only exhaust" fill="#dee2e6" stroke="#ced4da" stroke-width="2">
+          <circle class="puff p1" cx="6" cy="138" r="8"/><circle class="puff p2" cx="0" cy="130" r="6"/><circle class="puff p3" cx="8" cy="126" r="5"/>
+        </g>
+        <g class="bus-body">
+          <rect x="10" y="8" width="218" height="140" rx="18" fill="#fa5252" stroke="#a61e1e" stroke-width="4"/>
+          <rect x="14" y="12" width="210" height="62" rx="15" fill="#fff4e6"/>
+          <path d="M12 76 H226" stroke="#fff" stroke-width="5"/>
+          <!-- top deck windows, two happy children -->
+          <g fill="#a5d8ff" stroke="#a61e1e" stroke-width="3">
+            <rect x="24" y="22" width="34" height="38" rx="7"/><rect x="64" y="22" width="34" height="38" rx="7"/><rect x="104" y="22" width="34" height="38" rx="7"/><rect x="144" y="22" width="34" height="38" rx="7"/>
+            <path d="M184 22 H208 Q220 22 220 36 V60 H184 Z"/>
           </g>
-          <g class="wheel"><circle cx="202" cy="150" r="16" fill="#343a40"/><path d="M189 150 H215 M202 137 V163" stroke="#ced4da" stroke-width="3"/><circle cx="202" cy="150" r="5" fill="#ffd43b"/></g>
-          <g class="wheel"><circle cx="272" cy="150" r="16" fill="#343a40"/><path d="M259 150 H285 M272 137 V163" stroke="#ced4da" stroke-width="3"/><circle cx="272" cy="150" r="5" fill="#ffd43b"/></g>
-        </g>
-        <rect x="304" y="126" width="24" height="8" rx="3" fill="#495057"/>
-        <!-- engine (red cab, blue boiler, smiling face) -->
-        <g class="car engine">
-          <g class="smoke" fill="#dee2e6" stroke="#ced4da" stroke-width="2">
-            <circle class="puff p1" cx="466" cy="16" r="12"/><circle class="puff p2" cx="452" cy="10" r="10"/><circle class="puff p3" cx="480" cy="8" r="9"/>
+          <circle cx="81" cy="48" r="9" fill="#ffd8a8"/><path d="M72 46 q9 -12 18 0" fill="#5c3d2e"/><path d="M77 51 q4 3 8 0" stroke="#5c3d2e" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <circle cx="161" cy="48" r="9" fill="#ffd8a8"/><path d="M152 46 q9 -13 18 0" fill="#f08c00"/><path d="M157 51 q4 3 8 0" stroke="#5c3d2e" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- lower deck: windows, door, driver -->
+          <g fill="#a5d8ff" stroke="#a61e1e" stroke-width="3">
+            <rect x="24" y="86" width="34" height="30" rx="6"/><rect x="64" y="86" width="34" height="30" rx="6"/><rect x="104" y="86" width="34" height="30" rx="6"/>
+            <rect x="146" y="84" width="30" height="58" rx="5" fill="#d0ebff"/>
+            <path d="M184 86 H210 Q222 86 222 100 V118 H184 Z"/>
           </g>
-          <rect x="326" y="38" width="76" height="108" rx="10" fill="#ff6b6b" stroke="#c92a2a" stroke-width="4"/>
-          <rect x="318" y="28" width="92" height="16" rx="8" fill="#862e9c"/>
-          <rect x="342" y="54" width="44" height="36" rx="8" fill="#e7f5ff" stroke="#c92a2a" stroke-width="3"/>
-          <rect x="398" y="74" width="100" height="72" rx="18" fill="#4dabf7" stroke="#1864ab" stroke-width="4"/>
-          <path d="M428 76 V144 M458 76 V144" stroke="#1864ab" stroke-width="3" opacity=".5"/>
-          <path d="M456 74 V42 H446 Q442 30 452 30 H482 Q490 30 486 42 H476 V74 Z" fill="#343a40"/>
-          <circle cx="470" cy="100" r="5" fill="#1d1d1f"/><circle cx="488" cy="100" r="5" fill="#1d1d1f"/>
-          <circle cx="468" cy="98" r="1.8" fill="#fff"/><circle cx="486" cy="98" r="1.8" fill="#fff"/>
-          <path d="M468 114 q11 9 22 0" stroke="#1d1d1f" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-          <circle cx="462" cy="112" r="5" fill="#ff8787" opacity=".8"/>
-          <path d="M496 120 L516 146 H496 Z" fill="#ffd43b" stroke="#e67700" stroke-width="3" stroke-linejoin="round"/>
-          <g class="wheel"><circle cx="356" cy="148" r="20" fill="#343a40"/><path d="M339 148 H373 M356 131 V165" stroke="#ced4da" stroke-width="3.5"/><circle cx="356" cy="148" r="6" fill="#ffd43b"/></g>
-          <g class="wheel"><circle cx="420" cy="150" r="16" fill="#343a40"/><path d="M407 150 H433 M420 137 V163" stroke="#ced4da" stroke-width="3"/><circle cx="420" cy="150" r="5" fill="#ffd43b"/></g>
-          <g class="wheel"><circle cx="474" cy="150" r="16" fill="#343a40"/><path d="M461 150 H487 M474 137 V163" stroke="#ced4da" stroke-width="3"/><circle cx="474" cy="150" r="5" fill="#ffd43b"/></g>
+          <path d="M161 86 V140" stroke="#a61e1e" stroke-width="2.5"/>
+          <circle cx="203" cy="104" r="8" fill="#ffd8a8"/><path d="M194 100 h18 v-4 q-9 -8 -18 0 Z" fill="#1c7ed6"/>
+          <circle cx="206" cy="103" r="1.6" fill="#1d1d1f"/><path d="M200 108 q4 3 8 0" stroke="#5c3d2e" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- route number + headlight + bumper -->
+          <rect x="186" y="12" width="32" height="10" rx="3" fill="#212529"/><path d="M192 17 H212" stroke="#ffd43b" stroke-width="4" stroke-dasharray="4 3"/>
+          <circle cx="222" cy="130" r="5" fill="#ffd43b" stroke="#e67700" stroke-width="2"/>
+          <rect x="196" y="140" width="34" height="8" rx="4" fill="#495057"/>
         </g>
+        <g class="wheel bus-wheel"><circle cx="54" cy="148" r="17" fill="#343a40"/><circle cx="54" cy="148" r="8" fill="#ced4da"/><path d="M45 148 H63 M54 139 V157" stroke="#868e96" stroke-width="3"/></g>
+        <g class="wheel bus-wheel"><circle cx="186" cy="148" r="17" fill="#343a40"/><circle cx="186" cy="148" r="8" fill="#ced4da"/><path d="M177 148 H195 M186 139 V157" stroke="#868e96" stroke-width="3"/></g>
       </symbol>
 
       <symbol id="art-moto" viewBox="0 0 220 150">
-        <!-- a happy rider on a pink motorbike, facing right (same chunky outline style as the plane and train) -->
+        <!-- a happy rider on a pink motorbike, facing right (same chunky outline style as the other vehicles) -->
         <rect class="tile-only" x="2" y="142" width="216" height="6" rx="3" fill="#868e96"/>
         <!-- speed lines + exhaust puffs (animated on the trip only) -->
         <g class="stage-only speed-lines" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".95">
@@ -627,7 +694,8 @@
     <h1 id="start-title" class="app-name" tabindex="-1"><span class="zh" id="name-zh">講聲即郁</span><span class="en" lang="en" id="name-en">Say &amp; Go</span></h1>
     <div class="start-row" aria-hidden="true">
       <svg viewBox="0 0 220 140" focusable="false"><use href="#art-plane"/></svg>
-      <svg viewBox="0 0 520 172" focusable="false" style="width:clamp(110px,30vmin,280px)"><use href="#art-train"/></svg>
+      <svg viewBox="0 0 300 150" focusable="false" style="width:clamp(70px,20vmin,190px)"><use href="#art-mtr"/></svg>
+      <svg viewBox="0 0 240 170" focusable="false"><use href="#art-bus"/></svg>
       <svg viewBox="0 0 220 150" focusable="false"><use href="#art-moto"/></svg>
       <svg viewBox="0 0 260 150" focusable="false" style="width:clamp(66px,19vmin,178px)"><use href="#art-fire"/></svg>
     </div>
@@ -636,7 +704,7 @@
     <p id="start-status" aria-hidden="true"></p>
   </main>
 
-  <!-- ===== 2. Cover: four big pictures around a big toy microphone; listens for 飛機 / 火車 / 電單車 / 消防車 ===== -->
+  <!-- ===== 2. Cover: five big pictures around a big toy microphone; listens for 飛機 / 地鐵 / 巴士 / 電單車 / 消防車 ===== -->
   <main id="cover" class="screen" hidden aria-labelledby="cover-title">
     <div id="mic-ind" data-s="off" aria-hidden="true"><span class="dot"></span><span id="mic-ind-text">未聽</span></div>
     <h1 id="cover-title" tabindex="-1">你想坐咩呀？<span class="en" lang="en">Where shall we go?</span></h1>
@@ -691,7 +759,8 @@
       </div>
       <ul class="tiles" aria-label="交通工具 Vehicles">
         <li class="slot-plane"><button type="button" class="tile" data-v="plane"><span class="pic" aria-hidden="true"></span><span class="label"><span class="zh">飛機</span><span class="en" lang="en">Aeroplane</span></span></button></li>
-        <li class="slot-train"><button type="button" class="tile" data-v="train"><span class="pic" aria-hidden="true"></span><span class="label"><span class="zh">火車</span><span class="en" lang="en">Train</span></span></button></li>
+        <li class="slot-mtr"><button type="button" class="tile" data-v="mtr" aria-label="地鐵"><span class="pic" aria-hidden="true"></span><span class="label"><span class="zh">地鐵</span><span class="en" lang="en">MTR</span></span></button></li>
+        <li class="slot-bus"><button type="button" class="tile" data-v="bus" aria-label="巴士"><span class="pic" aria-hidden="true"></span><span class="label"><span class="zh">巴士</span><span class="en" lang="en">Bus</span></span></button></li>
         <li class="slot-moto"><button type="button" class="tile" data-v="moto" aria-label="電單車"><span class="pic" aria-hidden="true"></span><span class="label"><span class="zh">電單車</span><span class="en" lang="en">Motorbike</span></span></button></li>
         <li class="slot-fire"><button type="button" class="tile" data-v="fire" aria-label="消防車"><span class="pic" aria-hidden="true"></span><span class="label"><span class="zh">消防車</span><span class="en" lang="en">Fire truck</span></span></button></li>
       </ul>
@@ -704,10 +773,12 @@
   <!-- ===== Trip stage: the chosen vehicle's animation (decorative; described in the live region) ===== -->
   <div id="stage" hidden aria-hidden="true">
     <div class="scene scene-plane"><span class="cloud c1"></span><span class="cloud c2"></span><span class="cloud c3"></span></div>
-    <div class="scene scene-train"><div class="hills"></div><div class="rails"></div></div>
+    <div class="scene scene-mtr"><div class="skyline"></div><div class="viaduct"></div></div>
+    <div class="scene scene-bus"><span class="bldg b1"></span><span class="bldg b3"></span><span class="bus-stop"></span><div class="road"><div class="road-line"></div></div></div>
     <div class="scene scene-moto"><span class="tree t1"></span><span class="tree t2"></span><span class="tree t3"></span><div class="verge"></div><div class="road"><div class="road-line"></div></div></div>
     <div class="mover mover-plane"></div>
-    <div class="mover mover-train"></div>
+    <div class="mover mover-mtr"></div>
+    <div class="mover mover-bus"><div class="bus-tilt"></div></div>
     <div class="mover mover-moto"><div class="moto-tilt"></div></div>
     <div class="scene scene-fire"><span class="bldg b1"></span><span class="bldg b2"></span><span class="bldg b3"></span><div class="road"><div class="road-line"></div></div></div>
     <div class="mover mover-fire"><div class="fire-tilt"></div></div>
@@ -722,7 +793,7 @@
           <span class="en-help" lang="en">iPhone/iPad: open this page in Safari. Turn on Siri and Dictation in Settings (Settings → General → Keyboard → Enable Dictation). Tap Allow when Safari asks for the microphone and speech recognition.</span></li>
         <li>電腦：請用 Chrome 或者 Edge，網址列問用咪高峰嗰陣撳「允許」。
           <span class="en-help" lang="en">Computer: use Chrome or Edge, and allow the microphone when asked.</span></li>
-        <li>唔緊要！你都可以撳圖，聽吓飛機、火車、電單車同消防車嘅名。（要講出個名，佢哋先會郁。）
+        <li>唔緊要！你都可以撳圖，聽吓飛機、地鐵、巴士、電單車同消防車嘅名。（要講出個名，佢哋先會郁。）
           <span class="en-help" lang="en">You can still tap the pictures to hear their names. (The vehicles only move when the child says the name.)</span></li>
       </ul>
     </div>
@@ -783,46 +854,55 @@
   'use strict';
   /* ===================== settings ===================== */
   var ROUNDS_TO_END = 3;          // completed voice trips before the goodbye screen
-  var TRIP_MS = { plane: 3600, train: 2800, moto: 3400, fire: 4000 };
+  var TRIP_MS = { plane: 3600, mtr: 4200, bus: 4200, moto: 3400, fire: 4000 };
   var HOLD_MS = 1500;             // long-press for the parent "Play again" control
   var CLICK_DEDUPE_MS = 700;
   var HOLD_PREFIX_MS = 700;       // wait for the rest of an unfinished word that could mean another vehicle
   var IDLE_MS = 90000;            // stop listening after 90 s of nothing, show the Talk button
   var START_TIMEOUT_MS = 4000;    // a start() that never begins (iOS bug) is retried
   var RETRY_DELAYS = [300, 1000, 2000];
-  var PROMPT = '你想坐飛機、火車、電單車定係消防車呀？';
+  var PROMPT = '你想坐飛機、地鐵、巴士、電單車，定係消防車呀？';
   var TAP_PROMPT = '撳一張圖，聽吓佢個名。';
-  var SAY_NAME = { plane: '飛機', train: '火車', moto: '電單車', fire: '消防車' };   // spoken when a picture is tapped
-  var TRIP_ZH = { plane: '飛機起飛喇！飛呀飛！', train: '火車嚟喇，一卡一卡！', moto: '電單車嚟喇，轟轟轟！', fire: '消防車嚟喇，嘀嘟嘀嘟！' };
-  var TRIP_EN = { plane: 'The plane takes off and swoops around the sky!', train: 'The train chugs past, bumpity bump!', moto: 'The motorbike revs vroom vroom and zooms off down the road!', fire: 'The fire truck drives up with its siren going dee-daa dee-daa, stops, and drives off!' };
+  var SAY_NAME = { plane: '飛機', mtr: '地鐵', bus: '巴士', moto: '電單車', fire: '消防車' };   // spoken when a picture is tapped
+  var TRIP_ZH = { plane: '飛機起飛喇！飛呀飛！', mtr: '地鐵嚟喇，開門喇，嘟嘀！', bus: '巴士嚟喇，叮叮，到站喇！', moto: '電單車嚟喇，轟轟轟！', fire: '消防車嚟喇，嘀嘟嘀嘟！' };
+  var TRIP_EN = { plane: 'The plane takes off and swoops around the sky!', mtr: 'The MTR train glides in, opens its doors with a do-di chime, and glides off!', bus: 'The double-decker bus pulls up at the bus stop, ding ding, toots its horn and drives off!', moto: 'The motorbike revs vroom vroom and zooms off down the road!', fire: 'The fire truck drives up with its siren going dee-daa dee-daa, stops, and drives off!' };
 
   /* ===================== word matching (lenient, for ~3-year-olds) =====================
-     The name can be ANYWHERE in what was heard ("搭咩呀，搭飛機呀", "I want plane"); filler words are ignored.
-     Every recognition alternative and interim result is checked (confidence is ignored). Three strengths:
-       3 = the real name      飛機 / 火車 / 電單車, 電單, 摩托(車), 機車, 鐵馬 / plane, train, motorcycle, motorbike
-       2 = sloppy / homophone 灰機 非機 肥機 飛飛 飛雞 fei gei fly · 果車 和車 火火 嘟嘟 choo choo · 單車 丹車 電車 電電 摩多 嘟嘟車 bike motor brum vroom
-           · 消消 宵防 蕭防 滴嘟 fire nee-naw (fire truck: 消防車 / 救火車 / 滅火車 / 嘀嘟(車) / fire truck / fire engine are strength 3)
+     The name can be ANYWHERE in what was heard ("搭咩呀，搭飛機呀", "我要坐巴士"); filler words are ignored.
+     Only the Chinese names count (no English words). Every recognition alternative and interim result is checked
+     (confidence is ignored). Recognition: Cantonese first, then Mandarin (same Chinese names).
+     Strengths:
+       3 = the real name      飛機 · 地鐵 港鐵 東鐵 地鐵車 · 巴士 巴士仔 雙層巴士 小巴 大巴 公交(車) 公車
+                              · 電單車 電單 摩托(車) 機車 鐵馬 · 消防車 救火車 滅火車 嘀嘟(車)
+       2 = sloppy / homophone 灰機 非機 肥機 飛飛 飛雞 · 地地 地車 · 巴巴 巴巴士 巴西 · 單車 丹車 電車 電電 摩多
+                              嘟嘟車 轟轟 · 消消 宵防 蕭防 滴嘟
            + a cheap "sounds-like" match: each character is mapped to a small Jyutping/pinyin sound group, so e.g.
-             非雞 / 灰基 (fei-gei), 貨車 / 果車 (fo-ce), 甸丹車 (din-daan-ce), 磨拖 (mo-tok) still count
-       1 = one-syllable leftovers: 飛, 機, 火, 伙, 夥
-     Longer names are found first and "use up" their characters, so 機 inside 機車 / 電單車 never means the plane
-     and 嘟嘟 inside 嘟嘟車 means the motorbike, and 火車 inside 救火車 / 滅火車 means the fire truck. A few everyday words (手機, 司機, 相機, 打火機 ...) are blocked.
+             非雞 / 灰基 (fei-gei), 低鐵 (dei-tit), 吧士 / 巴獅 (baa-si), 甸丹車 (din-daan-ce), 磨拖 (mo-tok) still count
+           + toddler baby talk (see BABY_RULES below): 喜機 / 威機 / 飛地, 東鐵 / 當鐵 (港鐵 gong → dong), 甸車,
+             燒防車 / 蕭蕭車, reduplicated 飛飛 / 地地 / 巴巴 / 車車 / 轟轟 / 嘀嘟嘀嘟
+       1 = one-syllable leftovers: 飛, 機 (and 車車 for the motorbike)
+     Longer names are found first and "use up" their characters, so 機 inside 機車 / 電單車 never means the plane,
+     地 inside 地鐵 never means 飛地, 嘟嘟 inside 嘟嘟車 means the motorbike, and 救火車 is the fire truck.
+     A few everyday words (手機, 司機, 相機, 打火機, 火車 ...) are blocked. 巴 on its own (嘴巴, 尾巴) never counts.
      The best match wins (strength, then length, then earliest). No match: nothing happens, the game keeps listening. */
   var WORDS = [
-    // [vehicle, strength, words...]   (vehicle null = blocked everyday word)
-    [null, 4, '手機', '司機', '相機', '機器', '電視機', '洗衣機', '打火機', '收音機', '遊戲機', '冷氣機', '計數機', '火柴'],
-    ['plane', 3, '飛機', 'plane', 'airplane', 'aeroplane'],
-    ['train', 3, '火車', 'train'],
-    ['moto', 3, '電單車', '電單', '摩托車', '摩托', '機車', '鐵馬', 'motorcycle', 'motorbike', 'motor bike'],
-    ['fire', 3, '消防車', '消防', '救火車', '救火', '滅火車', '嘀嘟車', '嘀嘟', 'fire truck', 'fire engine', 'firetruck'],
-    ['plane', 2, '灰機', '非機', '肥機', '飛飛', '飛雞', 'fei gei', 'fly', 'plain'],
-    ['train', 2, '果車', '和車', '火火', '嘟嘟', 'choo choo', 'chuchu', 'choochoo'],
-    ['moto', 2, '單車', '丹車', '電車', '電電', '摩多', '嘟嘟車', 'bike', 'motor', 'brum', 'vroom', 'broom'],
-    ['fire', 2, '消消', '宵防', '蕭防', '消房', '滴嘟', '嘀嘀嘟', 'fire', 'nee naw', 'dee daa'],
+    // [vehicle, strength, words...]   (vehicle null = blocked everyday word). Chinese names only: the child says the
+    // Cantonese name (Mandarin recognition of the same Chinese names also works); English words never start a ride.
+    [null, 4, '手機', '司機', '相機', '機器', '電視機', '洗衣機', '打火機', '收音機', '遊戲機', '冷氣機', '計數機', '火柴', '火車', '嘴巴', '尾巴', '下巴'],
+    ['plane', 3, '飛機'],
+    ['mtr', 3, '地鐵', '港鐵', '東鐵', '地鐵車', '地鐵站'],
+    ['bus', 3, '巴士', '巴士仔', '雙層巴士', '小巴', '大巴', '公交車', '公交', '公車'],
+    ['moto', 3, '電單車', '電單', '摩托車', '摩托', '機車', '鐵馬'],
+    ['fire', 3, '消防車', '消防', '救火車', '救火', '滅火車', '嘀嘟車', '嘀嘟嘀嘟', '嘀嘟'],
+    ['plane', 2, '灰機', '非機', '肥機', '飛飛', '飛雞'],
+    ['mtr', 2, '地地', '地車', '鐵鐵車'],
+    ['bus', 2, '巴巴士', '巴巴', '巴西'],
+    ['moto', 2, '單單車', '單車', '丹車', '電車', '電電', '摩多', '嘟嘟車', '轟轟'],
+    ['fire', 2, '消消車', '消消', '宵防', '蕭防', '消房', '滴嘟', '嘀嘀嘟'],
     ['plane', 1, '飛', '機'],
-    ['train', 1, '火', '伙', '夥']
+    ['moto', 1, '車車']   // baby word for "car": weakest, so any real name in the same phrase wins
   ];
-  var SOUNDS_LIKE = ['飛機', '火車', '電單車', '摩托車', '摩托', '機車', '消防車', '消防', '救火車'];   // real names that also get the sounds-like match
+  var SOUNDS_LIKE = ['飛機', '地鐵', '港鐵', '巴士', '電單車', '電車', '摩托車', '摩托', '機車', '消防車', '消防', '消消車', '救火車'];   // names that also get the sounds-like match
   var SOUND_GROUPS = {   // Cantonese Jyutping / Mandarin pinyin near-homophones (Traditional; Simplified is converted first)
     fei: '飛非菲啡妃肥灰輝揮匪翡',
     gei: '機雞基幾己記紀寄技奇期旗箕姬積極集急吉擊計季既及即跡激',
@@ -834,29 +914,87 @@
     tok: '托拓拖脫駝妥陀',
     siu: '消宵蕭簫銷硝霄囂',
     fong: '防房方芳妨坊肪',
-    gau: '救九究灸久'
+    gau: '救九究灸久',
+    dei: '地低底', tit: '鐵貼帖鉄', gong: '港江崗鋼缸', baa: '巴吧芭疤叭', si: '士仕獅師詩絲'
   };
+  /* ---- toddler "baby talk" (Cantonese phonological simplifications) ----
+     For every syllable of the names above, BABY_RULES make the sloppy versions a 2-4 year old typically says, and the
+     characters a recogniser would write for those sounds (BABY_CHARS) are also accepted in that position. Tones are
+     ignored throughout. Rules: f → h / w / b / p, gw → g / w, kw → k / w, k → h / t (dropping / merging initials);
+     g → d, k → t (fronting velars); c → s / t (車 ce → se); n ↔ l; final -k / -t / -p dropped, -ng → -n.
+     e.g. 飛機 fei-gei → 喜機 hei-gei, 威機 wai-gei, 飛地 fei-dei · 港鐵 gong-tit → 東鐵 / 當鐵 dong-tit
+          消防車 → 燒防車, 消黃車 (fong → wong) · 救火車 gau → dau 豆火車, fo → ho 救呵車 · 甸車 (電車) · 蕭蕭車 (消消車)
+     BABY_CHARS is hand-picked: very common words are left out on purpose (俾 / 畀 / 比 bei, 喂 / 為 / 位 wai, 哋 dei,
+     波 bo, 喎 wo, 小 / 少 siu, 寫 / 社 se, 講 gong, 跌 tit, 爸 / 把 / 八 baa, 是 / 時 / 事 si ...) so everyday chatter like 「俾幾個我」, 「喂，幾點呀」, 「點寫呀」 or 「我哋」 never starts a ride. */
+  var SYLLABLE_OF = { '飛': 'fei', '機': 'gei', '火': 'fo', '車': 'ce', '電': 'din', '單': 'daan', '摩': 'mo', '托': 'tok', '消': 'siu', '防': 'fong', '救': 'gau', '地': 'dei', '鐵': 'tit', '港': 'gong', '巴': 'baa', '士': 'si' };
+  var BABY_CHARS = {
+    hei: '喜希稀嘻起氣戲汽器', wai: '威圍維偉', bei: '卑悲碑', pei: '披皮', dei: '地',
+    ho: '可何河荷賀呵', wo: '禾窩鍋蝸', po: '婆破坡',
+    se: '些蛇舍', siu: '燒笑', dau: '豆',
+    hong: '康糠', wong: '王黃旺汪皇', pong: '旁龐', bong: '邦綁', hon: '寒漢',
+    dong: '東冬當', gon: '乾干趕'
+  };
+  function babyVariants(syl) {
+    var m = /^(gw|kw|ng|[bpmfdtnlgkhwzcsj]?)(.*)$/.exec(syl), ini = m[1], fin = m[2];
+    var INI = { f: ['h', 'w', 'b', 'p'], gw: ['g', 'w'], kw: ['k', 'w'], k: ['h', 't'], g: ['d'], c: ['s', 't'], n: ['l'], l: ['n'] };
+    var inis = [ini].concat(INI[ini] || []), fins = [fin];
+    if (/[ktp]$/.test(fin) && fin.length > 1) fins.push(fin.slice(0, -1));   // drop final stop
+    if (/ng$/.test(fin)) fins.push(fin.slice(0, -1));                        // -ng → -n
+    var out = [];
+    inis.forEach(function (i) { fins.forEach(function (f) {
+      var v = i + f; if (i === 'w' && f === 'ei') v = 'wai';                 // Cantonese has no "wei": it comes out as wai (威)
+      if (v !== syl && out.indexOf(v) < 0) out.push(v);
+    }); });
+    return out;
+  }
   var S2T = { '飞': '飛', '机': '機', '车': '車', '电': '電', '单': '單', '铁': '鐵', '马': '馬', '鸡': '雞', '辉': '輝', '挥': '揮',
               '几': '幾', '记': '記', '纪': '紀', '极': '極', '击': '擊', '计': '計', '积': '積', '迹': '跡', '货': '貨', '祸': '禍',
               '获': '獲', '课': '課', '颗': '顆', '点': '點', '垫': '墊', '颠': '顛', '弹': '彈', '担': '擔', '诞': '誕', '没': '沒',
-              '脱': '脫', '驼': '駝', '灭': '滅', '萧': '蕭', '销': '銷', '箫': '簫', '旧': '舊', '视': '視', '戏': '戲', '游': '遊', '气': '氣', '数': '數' };
-  function normalise(s) {
+              '脱': '脫', '驼': '駝', '灭': '滅', '萧': '蕭', '销': '銷', '箫': '簫', '旧': '舊', '视': '視', '戏': '戲', '游': '遊', '气': '氣', '数': '數',
+              '层': '層', '双': '雙', '东': '東', '贴': '貼', '钢': '鋼', '岗': '崗', '狮': '獅', '师': '師', '诗': '詩', '丝': '絲', '当': '當', '赶': '趕', '尔': '爾' };
+  // Normalised text + where English words start/end (needed for the '=' whole-word entries).
+  function normaliseB(s) {
     s = String(s == null ? '' : s).toLowerCase();
-    var out = '';
-    for (var i = 0; i < s.length; i++) { var c = s.charAt(i); out += S2T[c] || c; }
+    var out = '', brk = [], gap = true;
     // strip spaces, punctuation and symbols (ASCII, Latin-1, general punctuation, CJK and full-width)
-    out = out.replace(/[\s\u0000-\u002f\u003a-\u0040\u005b-\u0060\u007b-\u00bf\u2000-\u206f\u3000-\u303f\uff00-\uff0f\uff1a-\uff20\uff3b-\uff40\uff5b-\uff65]/g, '');
-    return out.replace(/([a-z])\1+/g, '$1');   // stretched English sounds: "vroooom" = "vroom", "choo" = "cho"
+    var STRIP = /[\s\u0000-\u002f\u003a-\u0040\u005b-\u0060\u007b-\u00bf\u2000-\u206f\u3000-\u303f\uff00-\uff0f\uff1a-\uff20\uff3b-\uff40\uff5b-\uff65]/;
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charAt(i); c = S2T[c] || c;
+      if (STRIP.test(c)) { gap = true; continue; }
+      if (/[a-z]/.test(c) && out.charAt(out.length - 1) === c) { continue; }   // stretched English sounds: "vroooom" = "vroom", "choo" = "cho"
+      brk.push(gap); out += c; gap = false;
+    }
+    brk.push(true);
+    return { n: out, brk: brk };
   }
+  function normalise(s) { return normaliseB(s).n; }
+  function isLatin(c) { return /[a-z0-9]/.test(c || ''); }
+  function wordEdge(nb, j) { var n = nb.n; return j <= 0 || j >= n.length || nb.brk[j] || !isLatin(n.charAt(j - 1)) || !isLatin(n.charAt(j)); }
   var SOUND_OF = {};
   Object.keys(SOUND_GROUPS).forEach(function (g) { var cs = SOUND_GROUPS[g]; for (var i = 0; i < cs.length; i++) SOUND_OF[cs.charAt(i)] = g; });
   function soundKey(c) { return SOUND_OF[c] || c; }
+  // Characters accepted at one position of a sounds-like name: its homophone group + the baby-talk variants of its syllable.
+  function allowedFor(c) {
+    var set = {}, add = function (str) { for (var i = 0; i < str.length; i++) set[str.charAt(i)] = true; };
+    set[c] = true;
+    var g = SOUND_OF[c]; if (g) add(SOUND_GROUPS[g]);
+    var syl = SYLLABLE_OF[c] || g;
+    if (syl) { if (BABY_CHARS[syl]) add(BABY_CHARS[syl]); babyVariants(syl).forEach(function (v) { if (BABY_CHARS[v]) add(BABY_CHARS[v]); if (SOUND_GROUPS[v]) add(SOUND_GROUPS[v]); }); }
+    return set;
+  }
   var PATTERNS = [];
   WORDS.forEach(function (w) {
-    for (var i = 2; i < w.length; i++) PATTERNS.push({ v: w[0], tier: w[1], text: normalise(w[i]), sound: false });
+    for (var i = 2; i < w.length; i++) {
+      var whole = w[i].charAt(0) === '=';
+      PATTERNS.push({ v: w[0], tier: w[1], text: normalise(whole ? w[i].slice(1) : w[i]), sound: false, whole: whole });
+    }
   });
-  SOUNDS_LIKE.forEach(function (w) { var v = null; WORDS.forEach(function (x) { if (x.indexOf(w, 2) >= 2) v = x[0]; }); PATTERNS.push({ v: v, tier: 2, text: normalise(w), sound: true }); });
-  // Longest first (most specific: 救火車 before 火車, 嘟嘟車 before 嘟嘟, 機車 before 機), then strength, real words before sound-alikes.
+  SOUNDS_LIKE.forEach(function (w) {
+    var v = null; WORDS.forEach(function (x) { if (x.indexOf(w, 2) >= 2) v = x[0]; });
+    var t = normalise(w), sets = []; for (var i = 0; i < t.length; i++) sets.push(allowedFor(t.charAt(i)));
+    PATTERNS.push({ v: v, tier: 2, text: t, sound: true, sets: sets });
+  });
+  // Longest first (most specific: 救火車 before 火車, 嘟嘟車 before 嘟嘟, 機車 before 機, 地鐵 before 飛地), then strength, real words before sound-alikes.
   PATTERNS.sort(function (a, b) { return (b.text.length - a.text.length) || (b.tier - a.tier) || (a.sound - b.sound); });
   // Words that are the start of a longer word for ANOTHER vehicle (機 → 機車, 嘟嘟 → 嘟嘟車). If an unfinished (interim)
   // result ENDS with one of these, the game waits a moment for the rest of the word instead of firing straight away.
@@ -866,22 +1004,23 @@
   }); });
   // Returns the best match { v, tier, len, at, word } or null.
   function matchDetail(text) {
-    var n = normalise(text);
+    var nb = normaliseB(text), n = nb.n;
     if (!n) return null;
-    var used = [], keys = [], best = null;
-    for (var i = 0; i < n.length; i++) { used.push(false); keys.push(soundKey(n.charAt(i))); }
+    var used = [], best = null;
+    for (var i = 0; i < n.length; i++) used.push(false);
     PATTERNS.forEach(function (p) {
       var L = p.text.length;
       for (var at = 0; at + L <= n.length; at++) {
         var ok = true;
         for (var k = 0; k < L && ok; k++) {
           if (used[at + k]) ok = false;
-          else if (p.sound ? keys[at + k] !== soundKey(p.text.charAt(k)) : n.charAt(at + k) !== p.text.charAt(k)) ok = false;
+          else if (p.sound ? !p.sets[k][n.charAt(at + k)] : n.charAt(at + k) !== p.text.charAt(k)) ok = false;
         }
+        if (ok && p.whole && !(wordEdge(nb, at) && wordEdge(nb, at + L))) ok = false;
         if (!ok) continue;
         for (k = 0; k < L; k++) used[at + k] = true;
         if (p.v && (!best || p.tier > best.tier || (p.tier === best.tier && (L > best.len || (L === best.len && at < best.at)))))
-          best = { v: p.v, tier: p.tier, len: L, at: at, word: n.substr(at, L), atEnd: at + L === n.length };
+          best = { v: p.v, tier: p.tier, len: L, at: at, word: n.substr(at, L), atEnd: at + L === n.length, sound: p.sound };
         at += L - 1;
       }
     });
@@ -926,13 +1065,14 @@
   }
   tiles.forEach(function (t) { t.querySelector('.pic').appendChild(artCopy('art-' + t.getAttribute('data-v'))); });
   stage.querySelector('.mover-plane').appendChild(artCopy('art-plane'));
-  stage.querySelector('.mover-train').appendChild(artCopy('art-train'));
+  stage.querySelector('.mover-mtr').appendChild(artCopy('art-mtr'));
+  stage.querySelector('.mover-bus .bus-tilt').appendChild(artCopy('art-bus'));
   stage.querySelector('.mover-moto .moto-tilt').appendChild(artCopy('art-moto'));
   stage.querySelector('.mover-fire .fire-tilt').appendChild(artCopy('art-fire'));
 
   /* ===================== state ===================== */
   var state = { screen: 'start', mode: 'voice', rounds: 0, vehicle: null, blockedKind: null, needTap: false };
-  var stats = { trips: [], tapsSpoken: [], sounds: [], voice: { bye: 0 }, voiceVia: [], ignored: [], heard: [], matches: [] };
+  var stats = { trips: [], tapsSpoken: [], sounds: [], voice: { bye: 0 }, voiceVia: [], clipsPlayed: [], clipsFallback: [], ignored: [], heard: [], matches: [] };
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition || null;
 
   /* ===================== audio (Web Audio; unlocked by the first tap for iOS) ===================== */
@@ -996,29 +1136,79 @@
     lp.connect(am); am.connect(eg); eg.connect(pan); lfo.start(t); lfo.stop(t + d + 0.05);
     cleanup([pan, bp, ng, lp, eg, am, lfo, lfoG].concat(oscs), d);
   }
-  // TRAIN: rhythmic chug-chug (every 0.3 s), clickety-clack pairs on the 一卡一卡 bob (every 0.6 s), two "choo-choo" whistles.
-  function soundTrain() {
-    var d = TRIP_MS.train / 1000, t0 = ctx.currentTime + 0.03, pan = panner(-0.8, 0.8, t0, t0 + d); pan.connect(master);
-    var nodes = [pan];
-    [[0.05, 0.3], [0.45, 0.55]].forEach(function (w) {                  // choo ... chooo
-      var t = t0 + w[0], len = w[1], g = ctx.createGain(); env(g, t, [[0.04, 0.16], [len - 0.06, 0.13], [len, 0.0001]]); g.connect(pan);
-      var vib = ctx.createOscillator(); vib.frequency.value = 6; var vg = ctx.createGain(); vg.gain.value = 9; vib.connect(vg);
-      [740, 880, 1110].forEach(function (f) { var o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = f; vg.connect(o.frequency); o.connect(g); o.start(t); o.stop(t + len + 0.05); nodes.push(o); });
-      vib.start(t); vib.stop(t + len + 0.05); nodes.push(g, vib, vg);
+  // MTR: an electric "whoosh" (filtered noise) with the rising/falling motor whine as it glides in and brakes,
+  // the two-note "do-di" door chime (synthesised bell tones, twice: doors open ... doors close), a soft door
+  // "pssh", then the whine rises again and it whooshes off (panned left -> middle -> right). Timed with the animation.
+  function soundMtr() {
+    var d = TRIP_MS.mtr / 1000, t0 = ctx.currentTime + 0.03, nodes = [];
+    var pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null, out = pan || master;
+    if (pan) { pan.pan.setValueAtTime(-0.85, t0); pan.pan.linearRampToValueAtTime(0, t0 + 1.25); pan.pan.setValueAtTime(0, t0 + d * 0.66);
+      pan.pan.linearRampToValueAtTime(0.9, t0 + d); pan.connect(master); nodes.push(pan); }
+    // whoosh: noise through a sweeping bandpass, loud while moving, quiet while stopped
+    var bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 0.8;
+    bp.frequency.setValueAtTime(400, t0); bp.frequency.exponentialRampToValueAtTime(1500, t0 + 0.8); bp.frequency.exponentialRampToValueAtTime(300, t0 + 1.3);
+    bp.frequency.setValueAtTime(300, t0 + 2.75); bp.frequency.exponentialRampToValueAtTime(1800, t0 + 3.7); bp.frequency.exponentialRampToValueAtTime(700, t0 + d);
+    var wg = ctx.createGain(); env(wg, t0, [[0.5, 0.42], [1.05, 0.25], [1.35, 0.02], [2.75, 0.02], [3.4, 0.45], [d - 0.05, 0.0001]]);
+    var n = noiseSrc(t0, d); n.connect(bp); bp.connect(wg); wg.connect(out); nodes.push(bp, wg, n);
+    // motor whine (two detuned sines), pitch follows the speed
+    var mg = ctx.createGain(); env(mg, t0, [[0.3, 0.07], [1.25, 0.05], [1.4, 0.0001], [2.75, 0.0001], [3.0, 0.07], [d - 0.05, 0.0001]]); mg.connect(out); nodes.push(mg);
+    [1, 1.5].forEach(function (k) {
+      var o = ctx.createOscillator(); o.type = 'sine';
+      o.frequency.setValueAtTime(260 * k, t0); o.frequency.exponentialRampToValueAtTime(620 * k, t0 + 0.8); o.frequency.exponentialRampToValueAtTime(180 * k, t0 + 1.35);
+      o.frequency.setValueAtTime(180 * k, t0 + 2.75); o.frequency.exponentialRampToValueAtTime(760 * k, t0 + d);
+      o.connect(mg); o.start(t0); o.stop(t0 + d + 0.05); nodes.push(o);
     });
-    var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 650; lp.connect(pan);
-    var hp = ctx.createBiquadFilter(); hp.type = 'bandpass'; hp.frequency.value = 2600; hp.Q.value = 3; hp.connect(pan);
-    nodes.push(lp, hp);
-    for (var t = t0 + 0.1, i = 0; t < t0 + d - 0.15; t += 0.3, i++) {   // chug-a chug-a
-      var g = ctx.createGain(), v = i % 2 ? 0.35 : 0.6; env(g, t, [[0.012, v], [0.16, 0.0001]]);
-      var n = noiseSrc(t, 0.2); n.connect(g); g.connect(lp); nodes.push(g, n);
-    }
-    for (var c = t0 + 0.15; c < t0 + d - 0.1; c += 0.6) {                // clickety-clack (ka-ka)
-      [0, 0.1].forEach(function (off) {
-        var cg = ctx.createGain(); env(cg, c + off, [[0.003, 0.5], [0.035, 0.0001]]);
-        var cn = noiseSrc(c + off, 0.05); cn.connect(cg); cg.connect(hp); nodes.push(cg, cn);
+    // "do-di" door chime: two bell tones (do, then the higher di), at doors-open and again at doors-close
+    function bell(t, f) {
+      var g = ctx.createGain(); env(g, t, [[0.008, 0.32], [0.9, 0.0001]]); g.connect(master); nodes.push(g);
+      [[1, 1], [2.01, 0.35], [3.02, 0.12]].forEach(function (h) {
+        var o = ctx.createOscillator(), hg = ctx.createGain(); o.type = 'sine'; o.frequency.value = f * h[0]; hg.gain.value = h[1];
+        o.connect(hg); hg.connect(g); o.start(t); o.stop(t + 0.95); nodes.push(o, hg);
       });
     }
+    [1.45, 2.3].forEach(function (tc) { bell(t0 + tc, 784); bell(t0 + tc + 0.32, 1047); });
+    [1.6, 2.5].forEach(function (tp) {   // soft pneumatic door "pssh"
+      var hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 2500;
+      var pg = ctx.createGain(); env(pg, t0 + tp, [[0.04, 0.12], [0.35, 0.0001]]);
+      var pn = noiseSrc(t0 + tp, 0.4); pn.connect(hp); hp.connect(pg); pg.connect(master); nodes.push(hp, pg, pn);
+    });
+    cleanup(nodes, d);
+  }
+  // BUS: a chunky diesel engine (low sawtooth + square, lowpassed, with a rumbling tremolo) that idles at the stop,
+  // the "ding-ding" stop bell as it pulls in, and a friendly double "beep-beep" horn before it drives off.
+  function soundBus() {
+    var d = TRIP_MS.bus / 1000, t0 = ctx.currentTime + 0.03, nodes = [];
+    var pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null, out = pan || master;
+    if (pan) { pan.pan.setValueAtTime(-0.85, t0); pan.pan.linearRampToValueAtTime(0, t0 + 1.35); pan.pan.setValueAtTime(0, t0 + d * 0.62);
+      pan.pan.linearRampToValueAtTime(0.9, t0 + d); pan.connect(master); nodes.push(pan); }
+    var rpm = [[0, 38], [0.9, 62], [1.35, 30], [2.6, 30], [2.75, 30], [3.3, 70], [d, 82]];
+    var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 2; follow(lp.frequency, t0, rpm, function (r) { return 180 + r * 9; });
+    var eg = ctx.createGain(); env(eg, t0, [[0.25, 0.5], [1.3, 0.42], [1.5, 0.28], [2.6, 0.28], [3.2, 0.55], [d - 0.05, 0.0001]]);
+    var am = ctx.createGain(); am.gain.value = 0.6; var lfo = ctx.createOscillator(); lfo.type = 'sine'; follow(lfo.frequency, t0, rpm, function (r) { return r / 3; });
+    var lg = ctx.createGain(); lg.gain.value = 0.4; lfo.connect(lg); lg.connect(am.gain);
+    lp.connect(am); am.connect(eg); eg.connect(out); nodes.push(lp, eg, am, lfo, lg);
+    [['sawtooth', 1, 0.6], ['square', 0.5, 0.4]].forEach(function (p) {
+      var o = ctx.createOscillator(), g = ctx.createGain(); o.type = p[0]; g.gain.value = p[2];
+      follow(o.frequency, t0, rpm, function (r) { return r * p[1]; });
+      o.connect(g); g.connect(lp); o.start(t0); o.stop(t0 + d + 0.05); nodes.push(o, g);
+    });
+    lfo.start(t0); lfo.stop(t0 + d + 0.05);
+    // air-brake "pshhh" when it stops
+    var hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1800;
+    var bg = ctx.createGain(); env(bg, t0 + 1.3, [[0.03, 0.18], [0.5, 0.0001]]);
+    var bn = noiseSrc(t0 + 1.3, 0.55); bn.connect(hp); hp.connect(bg); bg.connect(out); nodes.push(hp, bg, bn);
+    // ding-ding stop bell
+    [1.55, 1.8].forEach(function (tb) {
+      var g = ctx.createGain(); env(g, t0 + tb, [[0.005, 0.3], [0.5, 0.0001]]); g.connect(master); nodes.push(g);
+      [[1568, 1], [3150, 0.3]].forEach(function (h) { var o = ctx.createOscillator(), hg = ctx.createGain(); o.type = 'sine'; o.frequency.value = h[0]; hg.gain.value = h[1];
+        o.connect(hg); hg.connect(g); o.start(t0 + tb); o.stop(t0 + tb + 0.55); nodes.push(o, hg); });
+    });
+    // beep-beep horn (two notes together, square through a lowpass)
+    [2.25, 2.55].forEach(function (th, i) {
+      var g = ctx.createGain(), len = i ? 0.3 : 0.18; env(g, t0 + th, [[0.02, 0.2], [len - 0.03, 0.18], [len, 0.0001]]);
+      var f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 2200; f.connect(g); g.connect(out); nodes.push(g, f);
+      [392, 494].forEach(function (hz) { var o = ctx.createOscillator(); o.type = 'square'; o.frequency.value = hz; o.connect(f); o.start(t0 + th); o.stop(t0 + th + len + 0.05); nodes.push(o); });
+    });
     cleanup(nodes, d);
   }
   // MOTORBIKE: a revving "vroom-vroom" engine, timed with the animation: rides in (0-1 s), stops in the middle and
@@ -1090,7 +1280,7 @@
   }
   function playTripSound(v) {
     if (!ensureAudio() || !master) { stats.sounds.push(v + ':none'); return; }
-    try { ({ plane: soundPlane, train: soundTrain, moto: soundMoto, fire: soundFire })[v](); stats.sounds.push(v); } catch (e) { stats.sounds.push(v + ':error'); }
+    try { ({ plane: soundPlane, mtr: soundMtr, bus: soundBus, moto: soundMoto, fire: soundFire })[v](); stats.sounds.push(v); } catch (e) { stats.sounds.push(v + ':error'); }
   }
   function playDing() {   // short "listening again" chime
     if (!ensureAudio() || !master) return;
@@ -1101,27 +1291,57 @@
     });
   }
 
-  /* ---- bundled child voice: "bye bye" (Piper TTS + pitch-up) ---- */
-  var byeVoice = { data: null, buffer: null, state: 'loading' };
-  function decodeVoices() {
-    if (!ctx || !byeVoice.data || byeVoice.buffer || byeVoice.decoding) return;
-    byeVoice.decoding = true;
-    var done = false, ok = function (b) { if (done) return; done = true; byeVoice.buffer = b; byeVoice.state = 'ready'; },
-        bad = function () { if (done) return; done = true; byeVoice.state = 'failed'; };
-    try { var p = ctx.decodeAudioData(byeVoice.data.slice(0), ok, bad); if (p && p.then) p.then(ok, bad); } catch (e) { bad(); }
+  /* ---- pre-recorded Cantonese voice clips (edge-tts zh-HK-HiuGaaiNeural, same voice/settings as the colour game) ----
+     The question, the tap-a-picture names (飛機 / 地鐵 / 巴士 / 電單車 / 消防車) and the goodbye
+     (home-byebye.mp3 = 「到屋企啦，bye bye！」, byebye-zh.mp3 = 「Bye bye！」). Fetched at load, decoded into the Web Audio
+     context that the Start tap creates (so iOS lets them play). speechSynthesis is only a fallback if a clip can't load.
+     (byebye.wav, the old Piper child voice, is kept in the folder but no longer used.) */
+  var CLIP_FILES = { home: 'home-byebye.mp3', bye: 'byebye-zh.mp3', prompt: 'prompt.mp3', tapPrompt: 'tap-prompt.mp3',
+    plane: 'name-plane.mp3', mtr: 'name-mtr.mp3', bus: 'name-bus.mp3', moto: 'name-moto.mp3', fire: 'name-fire.mp3',
+    blockedUnsupported: 'help-unsupported.mp3', blockedDenied: 'help-denied.mp3', blockedService: 'help-service.mp3', blockedNomic: 'help-nomic.mp3' };
+  var APP_VERSION = (document.querySelector('meta[name="app-version"]') || {}).content || '';
+  var BYE_CLIPS = { home: { say: '到屋企啦，拜拜！' }, bye: { say: '拜拜！' } };
+  var clips = {}, byeVoice = { state: 'loading', clips: clips };
+  Object.keys(CLIP_FILES).forEach(function (k) { clips[k] = { data: null, buffer: null, state: 'loading' }; });
+  function byeOverall() {
+    var st = ['home', 'bye'].map(function (k) { return clips[k].state; });
+    byeVoice.state = st.every(function (x) { return x === 'ready'; }) ? 'ready' : st.indexOf('failed') >= 0 ? 'failed' : st.indexOf('loading') >= 0 ? 'loading' : 'fetched';
   }
-  if (window.fetch && /^https?:$/.test(location.protocol)) {
-    fetch('byebye.wav').then(function (r) { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
-      .then(function (ab) { byeVoice.data = ab; byeVoice.state = 'fetched'; decodeVoices(); })
-      .catch(function () { byeVoice.state = 'failed'; });
-  } else byeVoice.state = 'failed';
-  function playBye(delay) {
+  function clipStates() { var o = {}; Object.keys(clips).forEach(function (k) { o[k] = clips[k].state; }); return o; }
+  function decodeVoices() {
+    if (!ctx) return;
+    Object.keys(clips).forEach(function (k) {
+      var c = clips[k];
+      if (!c.data || c.buffer || c.decoding) return;
+      c.decoding = true;
+      var done = false, ok = function (b) { if (done) return; done = true; c.buffer = b; c.state = 'ready'; byeOverall(); },
+          bad = function () { if (done) return; done = true; c.state = 'failed'; byeOverall(); };
+      try { var p = ctx.decodeAudioData(c.data.slice(0), ok, bad); if (p && p.then) p.then(ok, bad); } catch (e) { bad(); }
+    });
+  }
+  Object.keys(CLIP_FILES).forEach(function (k) {
+    var c = clips[k];
+    if (window.fetch && /^https?:$/.test(location.protocol)) {
+      fetch(CLIP_FILES[k] + '?v=' + encodeURIComponent(APP_VERSION)).then(function (r) { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+        .then(function (ab) { c.data = ab; c.state = 'fetched'; byeOverall(); decodeVoices(); })
+        .catch(function () { c.state = 'failed'; byeOverall(); });
+    } else { c.state = 'failed'; byeOverall(); }
+  });
+  var byeSources = [];
+  function stopBye() { byeSources.forEach(function (s) { try { s.stop(); } catch (e) { /* ignore */ } }); byeSources = []; }
+  // Plays clip `which` ('home' or 'bye') after `delay` seconds; returns its length in seconds (estimate for the fallback).
+  function playBye(delay, which) {
+    which = which || 'home';
     stats.voice.bye++;
-    if (ensureAudio() && master && byeVoice.buffer) {
-      var src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = byeVoice.buffer; g.gain.value = 1.15;
-      src.connect(g); g.connect(master); src.start(ctx.currentTime + (delay || 0)); stats.voiceVia.push('file'); return;
+    var c = clips[which];
+    if (ensureAudio() && master && c && c.buffer) {
+      var src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = c.buffer; g.gain.value = 1.15;
+      src.connect(g); g.connect(master); src.start(ctx.currentTime + (delay || 0)); byeSources.push(src);
+      stats.voiceVia.push('file:' + which); return c.buffer.duration;
     }
-    setTimeout(function () { say('拜拜！', { pitch: 1.9, rate: 0.95 }); stats.voiceVia.push('speech'); }, (delay || 0) * 1000);
+    var text = BYE_CLIPS[which].say;
+    byeTimers.push(setTimeout(function () { if (state.screen === 'goodbye') { say(text, { pitch: 1.3, rate: 0.9 }); stats.voiceVia.push('speech:' + which); } }, (delay || 0) * 1000));
+    return 0.5 + text.length * 0.25;
   }
 
   /* ===================== speech synthesis (zh-HK) ===================== */
@@ -1133,8 +1353,10 @@
     } catch (e) { /* ignore */ }
   }
   if (window.speechSynthesis) { pickVoice(); try { speechSynthesis.addEventListener('voiceschanged', pickVoice); } catch (e) { /* ignore */ } }
+  var saySrc = null;
   function stopSpeaking() {
     sayGen++; clearTimeout(sayTimer);
+    if (saySrc) { try { saySrc.stop(); } catch (e) { /* ignore */ } saySrc = null; }
     if (speaking) { speaking = false; try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } }
   }
   // Speak Cantonese; `done` runs ~0.3 s after it finishes (listening is paused meanwhile so the game can't hear itself).
@@ -1146,6 +1368,28 @@
       if (finished || gen !== sayGen) return; finished = true; clearTimeout(sayTimer); speaking = false; updateIndicator();
       if (done) setTimeout(function () { if (gen === sayGen) done(); }, 300);
     }
+    var clip = opts.clip && clips[opts.clip];
+    if (clip && !clip.buffer && clip.state !== 'failed' && !opts.waited) {   // clip still loading/decoding: wait (up to ~2 s) rather than use the system voice
+      speaking = true; updateIndicator();
+      var tries = 0, again = {}; for (var key in opts) again[key] = opts[key]; again.waited = true;
+      (function wait() {
+        if (gen !== sayGen) return;
+        if (clip.buffer || clip.state === 'failed' || ++tries > 40) { say(text, again, done); return; }
+        if (ctx) decodeVoices();
+        sayTimer = setTimeout(wait, 50);
+      })();
+      return;
+    }
+    if (clip && clip.buffer && ensureAudio() && master && ctx.state !== 'closed') {   // pre-recorded voice (queued if iOS is still resuming audio)
+      try {
+        var src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = clip.buffer; g.gain.value = 1.15;
+        src.connect(g); g.connect(master); src.start(ctx.currentTime + 0.02); saySrc = src;
+        speaking = true; updateIndicator(); stats.clipsPlayed.push(opts.clip);
+        sayTimer = setTimeout(fin, clip.buffer.duration * 1000 + 120);
+        return;
+      } catch (e) { /* fall through to speech synthesis */ }
+    }
+    if (opts.clip) stats.clipsFallback.push(opts.clip);
     if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) { fin(); return; }
     try {
       if (!ttsVoice) pickVoice();
@@ -1172,12 +1416,12 @@
     if (/Edg\//.test(ua)) return 'zh-HK'; // Edge: Microsoft speech service, zh-HK = Cantonese
     return 'yue-Hant-HK';                 // Chrome / Android: Google's code for Cantonese (Traditional, Hong Kong)
   }
-  // Language fallback chain: Cantonese first (both browser codes), then Mandarin, then English.
+  // Language fallback chain: Cantonese first (both browser codes), then Mandarin. No English pass.
   // (Recognisers can't be tuned for children's higher voices; the game copes through leniency instead:
   //  continuous listening, auto-restart, every alternative + interim result, confidence ignored, sloppy matching.)
   function langChain() {
     var first = pickLang(), out = [];
-    [first, first === 'zh-HK' ? 'yue-Hant-HK' : 'zh-HK', 'cmn-Hans-CN', 'zh-TW', 'en-US'].forEach(function (l) { if (out.indexOf(l) < 0) out.push(l); });
+    [first, first === 'zh-HK' ? 'yue-Hant-HK' : 'zh-HK', 'cmn-Hans-CN', 'zh-TW'].forEach(function (l) { if (out.indexOf(l) < 0) out.push(l); });
     return out;
   }
   var LANGS = langChain();
@@ -1350,8 +1594,8 @@
     var delay = opts.first || opts.reset ? 700 : 150;   // let VoiceOver read the heading first
     tripTimers.push(setTimeout(function () {
       if (state.screen !== 'cover') return;
-      if (state.mode === 'tap') say(TAP_PROMPT, {});
-      else say(PROMPT, {}, afterSpeech);
+      if (state.mode === 'tap') say(TAP_PROMPT, { clip: 'tapPrompt' });
+      else say(PROMPT, { clip: 'prompt' }, afterSpeech);
     }, delay));
     updateIndicator();
   }
@@ -1387,10 +1631,11 @@
       stats.tapsSpoken.push(v);
       var wasListening = state.mode === 'voice' && !state.needTap;
       srAbort(); clearTripTimers();                       // pause listening so the game doesn't hear its own voice
-      say(SAY_NAME[v], { rate: 0.9, pitch: 1.25 }, function () { if (wasListening && state.screen === 'cover') listen(false); });
+      say(SAY_NAME[v], { rate: 0.9, pitch: 1.25, clip: v }, function () { if (wasListening && state.screen === 'cover') listen(false); });
     });
   });
 
+  var BLOCKED_TAIL = 'iPhone 請用 Safari，同埋喺設定開啟 Siri 同聽寫。電腦請用 Chrome 或者 Edge。你都可以撳圖，聽吓佢哋個名。';
   var BLOCKED = {
     unsupported: ['呢個瀏覽器聽唔到講嘢', "This browser can't listen", '呢個瀏覽器用唔到語音辨識。'],
     denied: ['未准用咪高峰', 'Microphone not allowed', '冇權限用咪高峰。'],
@@ -1400,13 +1645,13 @@
   function showBlocked(kind) {
     srAbort(); rec.wanted = false; clearTripTimers();
     state.screen = 'blocked'; state.blockedKind = kind;
-    var b = BLOCKED[kind] || BLOCKED.denied;
+    var b = BLOCKED[kind] || BLOCKED.denied, bk = BLOCKED[kind] ? kind : 'denied';
     blockedZh.textContent = b[0]; blockedEn.textContent = b[1];
     retryBtn.hidden = !SR;
     show(blocked); stage.hidden = true; document.body.classList.remove('tripping');
     focusEl(blockedTitle);
     tripTimers.push(setTimeout(function () {
-      if (state.screen === 'blocked') say(b[2] + 'iPhone 請用 Safari，同埋喺設定開啟 Siri 同聽寫。電腦請用 Chrome 或者 Edge。你都可以撳圖，聽吓佢哋個名。', { rate: 0.95, pitch: 1.1 });
+      if (state.screen === 'blocked') say(b[2] + BLOCKED_TAIL, { rate: 0.95, pitch: 1.1, clip: 'blocked' + bk.charAt(0).toUpperCase() + bk.slice(1) });
     }, 900));
   }
   tapModeBtn.addEventListener('click', function () {
@@ -1429,12 +1674,12 @@
     show(goodbye); stage.hidden = true; document.body.classList.remove('tripping');
     focusEl(byeTitle);
     announce(zh('拜拜！玩咗三次，好叻！家長可以用右上角「再玩過」掣。') + ' ' + en('Bye bye! Three rides, well done. Parents: the Play again button is at the top right.'));
-    playBye(0.3);
-    byeTimers.push(setTimeout(function () { if (state.screen === 'goodbye') playBye(0); }, 2300));
+    var homeLen = playBye(0.3, 'home');                       // 「到屋企啦，bye bye！」
+    byeTimers.push(setTimeout(function () { if (state.screen === 'goodbye') playBye(0, 'bye'); }, (0.3 + homeLen + 0.7) * 1000));   // then one more 「Bye bye！」
     updateIndicator();
   }
   function playAgain() {
-    byeTimers.forEach(clearTimeout); byeTimers = [];
+    byeTimers.forEach(clearTimeout); byeTimers = []; stopBye();
     state.rounds = 0; stats.trips = [];
     ensureAudio(); unlockSpeech();
     goToCover({ reset: true });
@@ -1519,13 +1764,13 @@
   /* ---------- test / debug hook (read-only) ---------- */
   window.SayAndGo = {
     APP_NAME: APP_NAME, TRIP_MS: TRIP_MS, ROUNDS_TO_END: ROUNDS_TO_END, HOLD_MS: HOLD_MS, WORDS: WORDS, LANGS: LANGS,
-    match: matchVehicle, matchDetail: matchDetail, normalise: normalise,
+    match: matchVehicle, matchDetail: matchDetail, normalise: normalise, babyVariants: babyVariants,
     getState: function () {
       return { screen: state.screen, mode: state.mode, rounds: state.rounds, vehicle: state.vehicle, blockedKind: state.blockedKind,
         needTap: state.needTap, talkReason: state.talkReason || null, talkVisible: !talkBtn.hidden, speaking: speaking,
         listening: rec.running, recActive: !!rec.inst, lang: rec.lang, starts: rec.starts, granted: rec.granted, lastError: rec.lastError,
         langs: LANGS.slice(), matches: stats.matches.slice(), trips: stats.trips.slice(), sounds: stats.sounds.slice(), tapsSpoken: stats.tapsSpoken.slice(), heard: stats.heard.slice(),
-        ignored: stats.ignored.length, bye: stats.voice.bye, byeVia: stats.voiceVia.slice(), byeState: byeVoice.state,
+        ignored: stats.ignored.length, bye: stats.voice.bye, byeVia: stats.voiceVia.slice(), byeState: byeVoice.state, clips: clipStates(), clipsPlayed: stats.clipsPlayed.slice(), clipsFallback: stats.clipsFallback.slice(),
         indicator: micInd.getAttribute('data-s'), indicatorText: micIndText.textContent, micIcon: !micBig.hidden, stageVisible: !stage.hidden,
         stageVehicle: stage.getAttribute('data-v'), reduceMotion: reduceMotion, audioState: ctx ? ctx.state : 'none',
         againConfirmOpen: !againConfirm.hidden, announce: lastAnnounce };

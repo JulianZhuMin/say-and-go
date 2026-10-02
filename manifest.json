@@ -1,7 +1,7 @@
 {
   "name": "Say & Go 講聲即郁",
   "short_name": "講聲即郁",
-  "description": "講「飛機」、「火車」、「電單車」或者「消防車」，睇佢出發！ Say plane, train, motorbike or fire truck and watch it go.",
+  "description": "講「飛機」、「地鐵」、「巴士」、「電單車」或者「消防車」，睇佢出發！ Say the Cantonese name of the plane, MTR, bus, motorbike or fire truck and watch it go.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
