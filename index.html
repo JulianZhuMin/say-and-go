@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Say &amp; Go 講聲即郁</title>
 <meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」或者「消防車」，睇佢出發！ Say the Cantonese name of the plane, MTR, bus, motorbike or fire truck and watch it go. A voice game for toddlers.">
-<meta name="app-version" content="2026-10-03b-5vehicles-babytalk-hiugaai">
+<meta name="app-version" content="2026-10-03c-strict-mtr-bus-huoche">
 <meta name="theme-color" content="#4dabf7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -509,36 +509,67 @@
       </symbol>
 
       <symbol id="art-mtr" viewBox="0 0 300 150">
-        <!-- a Hong Kong MTR train, facing right: white body, red + blue stripes, sliding doors, smiling front window -->
-        <rect class="tile-only" x="0" y="142" width="300" height="6" rx="3" fill="#868e96"/>
+        <!-- a Hong Kong urban-line metro train (generic, no logo or brand text), facing right: two linked stainless-steel
+             cars, a bold red stripe along the side, wide double sliding doors, big windows, a rounded front cab with a large
+             dark windscreen (two friendly eyes), a destination display above it and headlights low on the nose -->
+        <g class="tile-only"><rect x="0" y="142" width="300" height="5" rx="2.5" fill="#868e96"/>
+          <path d="M8 147 V150 M34 147 V150 M60 147 V150 M86 147 V150 M112 147 V150 M138 147 V150 M164 147 V150 M190 147 V150 M216 147 V150 M242 147 V150 M268 147 V150 M294 147 V150" stroke="#adb5bd" stroke-width="5"/></g>
         <g class="mtr-body">
-          <path d="M150 30 L166 14 L184 30 M156 14 H178" stroke="#495057" stroke-width="3.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
-          <path d="M8 42 Q8 30 20 30 H238 Q280 30 292 72 L294 112 Q294 124 282 124 H20 Q8 124 8 112 Z" fill="#f8f9fa" stroke="#495057" stroke-width="4" stroke-linejoin="round"/>
-          <path d="M16 38 H246" stroke="#dee2e6" stroke-width="5" stroke-linecap="round"/>
-          <path d="M10 94 H293" stroke="#e03131" stroke-width="10"/>
-          <path d="M10 105 H293" stroke="#1c7ed6" stroke-width="4"/>
-          <g fill="#a5d8ff" stroke="#495057" stroke-width="3">
-            <rect x="20" y="48" width="34" height="30" rx="6"/><rect x="128" y="48" width="34" height="30" rx="6"/>
-          </g>
-          <!-- doors: two pairs (they slide open at the station) -->
-          <g class="door-l"><rect x="60" y="44" width="24" height="76" rx="3" fill="#e9ecef" stroke="#495057" stroke-width="3"/><rect x="65" y="52" width="14" height="26" rx="3" fill="#a5d8ff"/></g>
-          <g class="door-r"><rect x="84" y="44" width="24" height="76" rx="3" fill="#e9ecef" stroke="#495057" stroke-width="3"/><rect x="89" y="52" width="14" height="26" rx="3" fill="#a5d8ff"/></g>
-          <g class="door-l"><rect x="168" y="44" width="24" height="76" rx="3" fill="#e9ecef" stroke="#495057" stroke-width="3"/><rect x="173" y="52" width="14" height="26" rx="3" fill="#a5d8ff"/></g>
-          <g class="door-r"><rect x="192" y="44" width="24" height="76" rx="3" fill="#e9ecef" stroke="#495057" stroke-width="3"/><rect x="197" y="52" width="14" height="26" rx="3" fill="#a5d8ff"/></g>
-          <!-- front window with a happy face -->
-          <path d="M228 42 H250 Q274 44 284 74 H228 Z" fill="#a5d8ff" stroke="#495057" stroke-width="3" stroke-linejoin="round"/>
-          <circle cx="248" cy="58" r="4.5" fill="#1d1d1f"/><circle cx="264" cy="60" r="4.5" fill="#1d1d1f"/>
-          <circle cx="246.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="262.5" cy="58.5" r="1.6" fill="#fff"/>
-          <path d="M244 80 q13 9 27 0" stroke="#1d1d1f" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-          <circle cx="238" cy="80" r="5" fill="#ff8787" opacity=".8"/>
-          <circle cx="285" cy="86" r="4.5" fill="#ffd43b" stroke="#e67700" stroke-width="2"/>
+          <!-- pantograph on the roof -->
+          <path d="M60 56 L76 40 L92 56 M66 40 H86" stroke="#495057" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+          <rect x="62" y="52" width="28" height="5" rx="2" fill="#adb5bd"/>
+          <!-- gangway between the cars -->
+          <rect x="144" y="66" width="10" height="50" rx="2" fill="#495057"/>
+          <!-- car bodies: silver-white stainless steel -->
+          <path d="M4 62 Q4 56 10 56 H140 Q146 56 146 62 V118 Q146 124 140 124 H10 Q4 124 4 118 Z" fill="#f1f3f5" stroke="#495057" stroke-width="3.5" stroke-linejoin="round"/>
+          <path d="M152 62 Q152 56 158 56 H262 Q290 56 295 84 L296 118 Q296 124 290 124 H158 Q152 124 152 118 Z" fill="#f1f3f5" stroke="#495057" stroke-width="3.5" stroke-linejoin="round"/>
+          <path d="M10 61 H140 M158 61 H262" stroke="#dee2e6" stroke-width="3" stroke-linecap="round"/>
+          <!-- steel fluting low on the side -->
+          <path d="M8 115 H142 M8 119 H142 M156 115 H293 M156 119 H293" stroke="#dee2e6" stroke-width="1.6"/>
+          <!-- the bold red stripe -->
+          <path d="M6 106 H144 M154 106 H295" stroke="#e03131" stroke-width="8"/>
+          <!-- big windows -->
+          <g fill="#a5d8ff" stroke="#495057" stroke-width="2.5"><rect x="40" y="72" width="22" height="24" rx="4"/><rect x="90" y="72" width="20" height="24" rx="4"/><rect x="186" y="72" width="20" height="24" rx="4"/><rect x="236" y="72" width="20" height="24" rx="4"/></g>
+          <g stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".7"><path d="M44 90 L52 76" /><path d="M94 90 L102 76" /><path d="M190 90 L198 76" /><path d="M240 90 L248 76" /></g>
+          <!-- wide double sliding doors (they slide open at the station) -->
+          <rect x="16" y="66" width="20" height="56" fill="#fff3bf"/><path d="M26 68 V120" stroke="#ced4da" stroke-width="2"/>
+          <g class="door-l"><rect x="16" y="66" width="10" height="56" fill="#e9ecef" stroke="#495057" stroke-width="2"/><rect x="18" y="72" width="6" height="24" rx="1.5" fill="#a5d8ff"/><rect x="17.2" y="102" width="7.6" height="8" fill="#e03131"/></g>
+          <g class="door-r"><rect x="26" y="66" width="10" height="56" fill="#e9ecef" stroke="#495057" stroke-width="2"/><rect x="28" y="72" width="6" height="24" rx="1.5" fill="#a5d8ff"/><rect x="27.2" y="102" width="7.6" height="8" fill="#e03131"/></g>
+          <rect x="66" y="66" width="20" height="56" fill="#fff3bf"/><path d="M76 68 V120" stroke="#ced4da" stroke-width="2"/>
+          <g class="door-l"><rect x="66" y="66" width="10" height="56" fill="#e9ecef" stroke="#495057" stroke-width="2"/><rect x="68" y="72" width="6" height="24" rx="1.5" fill="#a5d8ff"/><rect x="67.2" y="102" width="7.6" height="8" fill="#e03131"/></g>
+          <g class="door-r"><rect x="76" y="66" width="10" height="56" fill="#e9ecef" stroke="#495057" stroke-width="2"/><rect x="78" y="72" width="6" height="24" rx="1.5" fill="#a5d8ff"/><rect x="77.2" y="102" width="7.6" height="8" fill="#e03131"/></g>
+          <rect x="114" y="66" width="20" height="56" fill="#fff3bf"/><path d="M124 68 V120" stroke="#ced4da" stroke-width="2"/>
+          <g class="door-l"><rect x="114" y="66" width="10" height="56" fill="#e9ecef" stroke="#495057" stroke-width="2"/><rect x="116" y="72" width="6" height="24" rx="1.5" fill="#a5d8ff"/><rect x="115.2" y="102" width="7.6" height="8" fill="#e03131"/></g>
+          <g class="door-r"><rect x="124" y="66" width="10" height="56" fill="#e9ecef" stroke="#495057" stroke-width="2"/><rect x="126" y="72" width="6" height="24" rx="1.5" fill="#a5d8ff"/><rect x="125.2" y="102" width="7.6" height="8" fill="#e03131"/></g>
+          <rect x="162" y="66" width="20" height="56" fill="#fff3bf"/><path d="M172 68 V120" stroke="#ced4da" stroke-width="2"/>
+          <g class="door-l"><rect x="162" y="66" width="10" height="56" fill="#e9ecef" stroke="#495057" stroke-width="2"/><rect x="164" y="72" width="6" height="24" rx="1.5" fill="#a5d8ff"/><rect x="163.2" y="102" width="7.6" height="8" fill="#e03131"/></g>
+          <g class="door-r"><rect x="172" y="66" width="10" height="56" fill="#e9ecef" stroke="#495057" stroke-width="2"/><rect x="174" y="72" width="6" height="24" rx="1.5" fill="#a5d8ff"/><rect x="173.2" y="102" width="7.6" height="8" fill="#e03131"/></g>
+          <rect x="210" y="66" width="20" height="56" fill="#fff3bf"/><path d="M220 68 V120" stroke="#ced4da" stroke-width="2"/>
+          <g class="door-l"><rect x="210" y="66" width="10" height="56" fill="#e9ecef" stroke="#495057" stroke-width="2"/><rect x="212" y="72" width="6" height="24" rx="1.5" fill="#a5d8ff"/><rect x="211.2" y="102" width="7.6" height="8" fill="#e03131"/></g>
+          <g class="door-r"><rect x="220" y="66" width="10" height="56" fill="#e9ecef" stroke="#495057" stroke-width="2"/><rect x="222" y="72" width="6" height="24" rx="1.5" fill="#a5d8ff"/><rect x="221.2" y="102" width="7.6" height="8" fill="#e03131"/></g>
+          <!-- front cab: destination display, large dark windscreen with friendly eyes, smile, headlights -->
+          <rect x="262" y="60" width="24" height="7" rx="2" fill="#343a40"/>
+          <path d="M266 63.5 H282" stroke="#ffa94d" stroke-width="2.4" stroke-dasharray="2.4 1.6"/>
+          <path d="M260 70 H272 Q287 71 292 92 V98 H260 Z" fill="#212529" stroke="#495057" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M264 92 L270 74" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".35"/>
+          <ellipse cx="272" cy="84" rx="5" ry="6" fill="#fff"/><ellipse cx="285" cy="85" rx="4.5" ry="5.5" fill="#fff"/>
+          <circle cx="273" cy="85" r="2.8" fill="#1d1d1f"/><circle cx="286" cy="86" r="2.6" fill="#1d1d1f"/>
+          <circle cx="272" cy="83.6" r="1" fill="#fff"/><circle cx="285" cy="84.6" r="1" fill="#fff"/>
+          <path d="M268 113 q8 6 16 0" stroke="#1d1d1f" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+          <circle cx="264" cy="114" r="3.2" fill="#ff8787" opacity=".75"/>
+          <circle cx="291" cy="116" r="3.6" fill="#fff9db" stroke="#e67700" stroke-width="1.8"/>
         </g>
-        <!-- bogies + wheels -->
-        <rect x="26" y="122" width="62" height="8" rx="4" fill="#495057"/><rect x="190" y="122" width="62" height="8" rx="4" fill="#495057"/>
-        <g class="wheel mtr-wheel"><circle cx="40" cy="132" r="10" fill="#343a40"/><circle cx="40" cy="132" r="3.5" fill="#ced4da"/><path d="M32 132 H48" stroke="#868e96" stroke-width="2.5"/></g>
-        <g class="wheel mtr-wheel"><circle cx="74" cy="132" r="10" fill="#343a40"/><circle cx="74" cy="132" r="3.5" fill="#ced4da"/><path d="M66 132 H82" stroke="#868e96" stroke-width="2.5"/></g>
-        <g class="wheel mtr-wheel"><circle cx="204" cy="132" r="10" fill="#343a40"/><circle cx="204" cy="132" r="3.5" fill="#ced4da"/><path d="M196 132 H212" stroke="#868e96" stroke-width="2.5"/></g>
-        <g class="wheel mtr-wheel"><circle cx="238" cy="132" r="10" fill="#343a40"/><circle cx="238" cy="132" r="3.5" fill="#ced4da"/><path d="M230 132 H246" stroke="#868e96" stroke-width="2.5"/></g>
+        <!-- under-frame, bogies + wheels -->
+        <rect x="20" y="124" width="40" height="6" rx="3" fill="#495057"/><rect x="90" y="124" width="40" height="6" rx="3" fill="#495057"/>
+        <rect x="168" y="124" width="40" height="6" rx="3" fill="#495057"/><rect x="240" y="124" width="40" height="6" rx="3" fill="#495057"/>
+        <g class="wheel mtr-wheel"><circle cx="28" cy="134" r="8" fill="#343a40"/><circle cx="28" cy="134" r="3" fill="#ced4da"/><path d="M22 134 H34" stroke="#868e96" stroke-width="2.2"/></g>
+        <g class="wheel mtr-wheel"><circle cx="52" cy="134" r="8" fill="#343a40"/><circle cx="52" cy="134" r="3" fill="#ced4da"/><path d="M46 134 H58" stroke="#868e96" stroke-width="2.2"/></g>
+        <g class="wheel mtr-wheel"><circle cx="98" cy="134" r="8" fill="#343a40"/><circle cx="98" cy="134" r="3" fill="#ced4da"/><path d="M92 134 H104" stroke="#868e96" stroke-width="2.2"/></g>
+        <g class="wheel mtr-wheel"><circle cx="122" cy="134" r="8" fill="#343a40"/><circle cx="122" cy="134" r="3" fill="#ced4da"/><path d="M116 134 H128" stroke="#868e96" stroke-width="2.2"/></g>
+        <g class="wheel mtr-wheel"><circle cx="176" cy="134" r="8" fill="#343a40"/><circle cx="176" cy="134" r="3" fill="#ced4da"/><path d="M170 134 H182" stroke="#868e96" stroke-width="2.2"/></g>
+        <g class="wheel mtr-wheel"><circle cx="200" cy="134" r="8" fill="#343a40"/><circle cx="200" cy="134" r="3" fill="#ced4da"/><path d="M194 134 H206" stroke="#868e96" stroke-width="2.2"/></g>
+        <g class="wheel mtr-wheel"><circle cx="248" cy="134" r="8" fill="#343a40"/><circle cx="248" cy="134" r="3" fill="#ced4da"/><path d="M242 134 H254" stroke="#868e96" stroke-width="2.2"/></g>
+        <g class="wheel mtr-wheel"><circle cx="272" cy="134" r="8" fill="#343a40"/><circle cx="272" cy="134" r="3" fill="#ced4da"/><path d="M266 134 H278" stroke="#868e96" stroke-width="2.2"/></g>
       </symbol>
 
       <symbol id="art-bus" viewBox="0 0 240 170">
@@ -863,7 +894,7 @@
   var RETRY_DELAYS = [300, 1000, 2000];
   var PROMPT = '你想坐飛機、地鐵、巴士、電單車，定係消防車呀？';
   var TAP_PROMPT = '撳一張圖，聽吓佢個名。';
-  var SAY_NAME = { plane: '飛機', mtr: '地鐵', bus: '巴士', moto: '電單車', fire: '消防車' };   // spoken when a picture is tapped
+  var SAY_NAME = { plane: '飛機', mtr: '地鐵火車', bus: '巴士', moto: '電單車', fire: '消防車' };   // spoken when a picture is tapped
   var TRIP_ZH = { plane: '飛機起飛喇！飛呀飛！', mtr: '地鐵嚟喇，開門喇，嘟嘀！', bus: '巴士嚟喇，叮叮，到站喇！', moto: '電單車嚟喇，轟轟轟！', fire: '消防車嚟喇，嘀嘟嘀嘟！' };
   var TRIP_EN = { plane: 'The plane takes off and swoops around the sky!', mtr: 'The MTR train glides in, opens its doors with a do-di chime, and glides off!', bus: 'The double-decker bus pulls up at the bus stop, ding ding, toots its horn and drives off!', moto: 'The motorbike revs vroom vroom and zooms off down the road!', fire: 'The fire truck drives up with its siren going dee-daa dee-daa, stops, and drives off!' };
 
@@ -872,37 +903,35 @@
      Only the Chinese names count (no English words). Every recognition alternative and interim result is checked
      (confidence is ignored). Recognition: Cantonese first, then Mandarin (same Chinese names).
      Strengths:
-       3 = the real name      飛機 · 地鐵 港鐵 東鐵 地鐵車 · 巴士 巴士仔 雙層巴士 小巴 大巴 公交(車) 公車
+       3 = the real name      飛機 · 地鐵 地鐵車 地鐵站 火車 火車仔 · 巴士 巴士仔 雙層巴士   (MTR: only phrases containing 地鐵 or 火車; bus: only 巴士)
                               · 電單車 電單 摩托(車) 機車 鐵馬 · 消防車 救火車 滅火車 嘀嘟(車)
-       2 = sloppy / homophone 灰機 非機 肥機 飛飛 飛雞 · 地地 地車 · 巴巴 巴巴士 巴西 · 單車 丹車 電車 電電 摩多
+       2 = sloppy / homophone 灰機 非機 肥機 飛飛 飛雞 · 單車 丹車 電車 電電 摩多
                               嘟嘟車 轟轟 · 消消 宵防 蕭防 滴嘟
            + a cheap "sounds-like" match: each character is mapped to a small Jyutping/pinyin sound group, so e.g.
-             非雞 / 灰基 (fei-gei), 低鐵 (dei-tit), 吧士 / 巴獅 (baa-si), 甸丹車 (din-daan-ce), 磨拖 (mo-tok) still count
-           + toddler baby talk (see BABY_RULES below): 喜機 / 威機 / 飛地, 東鐵 / 當鐵 (港鐵 gong → dong), 甸車,
-             燒防車 / 蕭蕭車, reduplicated 飛飛 / 地地 / 巴巴 / 車車 / 轟轟 / 嘀嘟嘀嘟
+             非雞 / 灰基 (fei-gei), 甸丹車 (din-daan-ce), 磨拖 (mo-tok) still count (not for the MTR or the bus)
+           + toddler baby talk (see BABY_RULES below): 喜機 / 威機 / 飛地, 甸車,
+             燒防車 / 蕭蕭車, reduplicated 飛飛 / 車車 / 轟轟 / 嘀嘟嘀嘟 (not for the MTR or the bus)
        1 = one-syllable leftovers: 飛, 機 (and 車車 for the motorbike)
      Longer names are found first and "use up" their characters, so 機 inside 機車 / 電單車 never means the plane,
      地 inside 地鐵 never means 飛地, 嘟嘟 inside 嘟嘟車 means the motorbike, and 救火車 is the fire truck.
-     A few everyday words (手機, 司機, 相機, 打火機, 火車 ...) are blocked. 巴 on its own (嘴巴, 尾巴) never counts.
+     A few everyday words (手機, 司機, 相機, 打火機, 火柴 ...) are blocked; 救火車 is the fire truck, 火車 the MTR. 巴 on its own (嘴巴, 尾巴) never counts.
      The best match wins (strength, then length, then earliest). No match: nothing happens, the game keeps listening. */
   var WORDS = [
     // [vehicle, strength, words...]   (vehicle null = blocked everyday word). Chinese names only: the child says the
     // Cantonese name (Mandarin recognition of the same Chinese names also works); English words never start a ride.
-    [null, 4, '手機', '司機', '相機', '機器', '電視機', '洗衣機', '打火機', '收音機', '遊戲機', '冷氣機', '計數機', '火柴', '火車', '嘴巴', '尾巴', '下巴'],
+    [null, 4, '手機', '司機', '相機', '機器', '電視機', '洗衣機', '打火機', '收音機', '遊戲機', '冷氣機', '計數機', '火柴', '嘴巴', '尾巴', '下巴'],
     ['plane', 3, '飛機'],
-    ['mtr', 3, '地鐵', '港鐵', '東鐵', '地鐵車', '地鐵站'],
-    ['bus', 3, '巴士', '巴士仔', '雙層巴士', '小巴', '大巴', '公交車', '公交', '公車'],
+    ['mtr', 3, '地鐵', '地鐵車', '地鐵站', '火車', '火車仔'],   // the MTR starts ONLY when 地鐵 or 火車 is said (no 港鐵 / 東鐵 / 地地 / 地車, no sound-alikes)
+    ['bus', 3, '巴士', '巴士仔', '雙層巴士'],        // the bus starts ONLY when 巴士 is said (no 巴巴 / 小巴 / 公車, no sound-alikes)
     ['moto', 3, '電單車', '電單', '摩托車', '摩托', '機車', '鐵馬'],
     ['fire', 3, '消防車', '消防', '救火車', '救火', '滅火車', '嘀嘟車', '嘀嘟嘀嘟', '嘀嘟'],
     ['plane', 2, '灰機', '非機', '肥機', '飛飛', '飛雞'],
-    ['mtr', 2, '地地', '地車', '鐵鐵車'],
-    ['bus', 2, '巴巴士', '巴巴', '巴西'],
     ['moto', 2, '單單車', '單車', '丹車', '電車', '電電', '摩多', '嘟嘟車', '轟轟'],
     ['fire', 2, '消消車', '消消', '宵防', '蕭防', '消房', '滴嘟', '嘀嘀嘟'],
     ['plane', 1, '飛', '機'],
     ['moto', 1, '車車']   // baby word for "car": weakest, so any real name in the same phrase wins
   ];
-  var SOUNDS_LIKE = ['飛機', '地鐵', '港鐵', '巴士', '電單車', '電車', '摩托車', '摩托', '機車', '消防車', '消防', '消消車', '救火車'];   // names that also get the sounds-like match
+  var SOUNDS_LIKE = ['飛機', '電單車', '電車', '摩托車', '摩托', '機車', '消防車', '消防', '消消車', '救火車'];   // names that also get the sounds-like match
   var SOUND_GROUPS = {   // Cantonese Jyutping / Mandarin pinyin near-homophones (Traditional; Simplified is converted first)
     fei: '飛非菲啡妃肥灰輝揮匪翡',
     gei: '機雞基幾己記紀寄技奇期旗箕姬積極集急吉擊計季既及即跡激',
@@ -922,7 +951,7 @@
      characters a recogniser would write for those sounds (BABY_CHARS) are also accepted in that position. Tones are
      ignored throughout. Rules: f → h / w / b / p, gw → g / w, kw → k / w, k → h / t (dropping / merging initials);
      g → d, k → t (fronting velars); c → s / t (車 ce → se); n ↔ l; final -k / -t / -p dropped, -ng → -n.
-     e.g. 飛機 fei-gei → 喜機 hei-gei, 威機 wai-gei, 飛地 fei-dei · 港鐵 gong-tit → 東鐵 / 當鐵 dong-tit
+     e.g. 飛機 fei-gei → 喜機 hei-gei, 威機 wai-gei, 飛地 fei-dei (the MTR and the bus get no baby-talk variants: only 地鐵 or 火車 / 巴士 count)
           消防車 → 燒防車, 消黃車 (fong → wong) · 救火車 gau → dau 豆火車, fo → ho 救呵車 · 甸車 (電車) · 蕭蕭車 (消消車)
      BABY_CHARS is hand-picked: very common words are left out on purpose (俾 / 畀 / 比 bei, 喂 / 為 / 位 wai, 哋 dei,
      波 bo, 喎 wo, 小 / 少 siu, 寫 / 社 se, 講 gong, 跌 tit, 爸 / 把 / 八 baa, 是 / 時 / 事 si ...) so everyday chatter like 「俾幾個我」, 「喂，幾點呀」, 「點寫呀」 or 「我哋」 never starts a ride. */
