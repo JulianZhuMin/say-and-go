@@ -3,7 +3,7 @@
 A voice game for toddlers. Say the Cantonese name of one of five vehicles and it goes across the screen with its own sound:
 
 - 「飛機」 plane
-- 「地鐵」 or 「火車」 MTR train (only phrases containing 地鐵 or 火車, e.g. 地鐵車, 地鐵站, 火車仔; tapping its picture says 「地鐵火車」): a two-car silver train with a red stripe glides along a viaduct, stops, the doors open with the "do-di" chime and close again
+- 「地鐵」 or 「火車」 MTR train (only phrases containing 地鐵 or 火車, e.g. 地鐵車, 地鐵站, 火車仔; tapping its picture says 「地鐵」): a two-car silver train with a red stripe glides along a viaduct, stops, the doors open with the "do-di" chime and close again
 - 「巴士」 bus (only phrases containing 巴士, e.g. 巴士仔, 雙層巴士): a red double-decker pulls up at the bus stop, ding-ding, air brakes, beep-beep
 - 「電單車」 motorbike (also 電單, 摩托車, 摩托, 機車, 鐵馬): revs "vroom vroom" and zooms off
 - 「消防車」 fire truck (also 消防, 救火車, 救火, 滅火車, 嘀嘟車, 嘀嘟): flashes its lights, plays a two-tone "dee-daa" siren, stops, then drives off
