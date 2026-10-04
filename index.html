@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Say &amp; Go 講聲即郁</title>
 <meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」或者「消防車」，睇佢出發！ Say the Cantonese name of the plane, MTR, bus, motorbike or fire truck and watch it go. A voice game for toddlers.">
-<meta name="app-version" content="2026-10-04b-ride-heading">
+<meta name="app-version" content="2026-10-04c-vowel-match">
 <meta name="theme-color" content="#4dabf7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1031,10 +1031,10 @@
   PATTERNS.forEach(function (p) { PATTERNS.forEach(function (q) {
     if (p.v && q.v && p.v !== q.v && !p.sound && !q.sound && q.text.length > p.text.length && q.text.indexOf(p.text) === 0) PREFIX_OF_OTHER[p.text] = true;
   }); });
-  // Returns the best match { v, tier, len, at, word } or null.
-  function matchDetail(text) {
+  // Exact / sloppy word match (the first, fastest path). Returns { best, n, used } (used = characters taken by a name or a blocked word).
+  function matchExact(text) {
     var nb = normaliseB(text), n = nb.n;
-    if (!n) return null;
+    if (!n) return { best: null, n: n, used: [] };
     var used = [], best = null;
     for (var i = 0; i < n.length; i++) used.push(false);
     PATTERNS.forEach(function (p) {
@@ -1053,7 +1053,68 @@
         at += L - 1;
       }
     });
+    return { best: best, n: n, used: used };
+  }
+
+  /* ---------- second path: vowel (final) matching for toddler voices ----------
+     Children's voices are high and their consonants are often unclear, so the recogniser may write 備機 / 非機 for 飛機,
+     記鐵 / 利鐵 for 地鐵 or 先單車 for 電單車. If no name was found above, every character is turned into its Cantonese
+     finals (the rime: vowel + ending, tones ignored; a character with several readings tries all of them) and we slide
+     over the text looking for consecutive characters whose finals match a name, syllable by syllable. Initials
+     (consonants) may differ or be missing. 3-syllable names also count when their LAST TWO syllables match (單車, 防車).
+     More matching syllables wins, then more characters identical to the real name, then the earliest.
+     VOWEL_FINALS: char → final table for just the finals these names use, generated offline from rime-cantonese
+     (jyut6ping3.chars.dict.yaml, CC BY 4.0; common readings only) for common Traditional (Big5 level 1) and
+     Simplified (GB2312) characters — see voice-game-work/jyutping/build_table.py. */
+  var VOWEL_FINALS = {
+    ei: '丌丕乩亓仳企伎伲你俐俚俾備僖其冀几利剞匕匪卑厘吏吡呢味呸哩唏喜喱嘻嘿器四圮地圻埤基备奇妃妓妣妮妳姬娌娓婢媚媲嫠嬉嬖寄寐尼尾屁屘屝履屺岂岐崎嵋己希帔幾庀庇庋庳弃弥弭彌彼微忌忮怩悝您悱悲惫愒憊憩戏戲扉技披掎敉斐旎旗既晞暨曦期未机李杞枇桤梨棄棋楣榧機欷欹欺歧死比毖毗气氣汆汽沘泌洎浠浬淇淝淠湄滗漓濞瀰烯熙熹牺犄犛犧狒狸猁猕猸玑珥珪理琍琦琪琵璃璣畀畸畿疲痞痢痱痹痺皮眉眯矶砒碑磯祁祇祈祕祢祺禧离秕秘稀箄箅箕篚篦篱籬糜紀紕綦縻纪纰绯缡罴罹羁羈羋美羲翡耆肆肌肥脾腓腻膩臂舭艉芈芑芘芪芰苤莅莉菲萁萆蒞蓖蓠蕲薇蘼虮蚍蜊蜚蜞蜱衹被裨覬觊記訢詈詖誹譆譏譬讥记诶诽豈貍貔賁贲起跽轡辔逦避邐邳郗郫鄙醯里釐鈹鉍鋰錡鎂铋铌铍锂镁镅陂陴離霏非靡鞴颀飛飞飢餌饑饥饩饵驥驪骊骐骥髀魅鯉鰭鲡鲤鲱鳍鹂鹎鹛麂麋麒黴鼙鼻',
+    it: '丿亵佚傑冽切列別别卩咧哲唳唼啮噎垤婕孑屑屮帙彆彻徹必恝憋戛截折挈捩捷揭揲撇撤撷擷暍杰栉桀楔榍櫛歇氕沏泄洁洌洩浙渫滅潔澈灭烈热熱燮瓞疖瘪癟睫瞥碣秩窃竊竭節篾紲結絰绁结缬羯耋臬舌节蔑薛蘖蚀蛰蜇蝎蝕蠍蠛裂褻訐設詰謁讦设诘谒趄趔跌踅蹩躞轍辙迭鉍鍥鐵铁铋锲陧頡颉餮鱉鲒鳖黠齧',
+    o: '个仫伙佐何俄俎個倭倮傩傻儸刍初助匚卧厂可叵呙呵和咯哆哟哥哦哿唆唑唢唷唾啊啵喏喲嗦嗬嚯囉坐坡坨坷垛埚堕堝墮多夥妥娑娜娥娲婀婆媧屙岢峨嵯左座惰懦戈我所拖挝挪挫挲搓摞摩摸播撾斡旮旯朵果柁柯桫梭梳棵椤椭楚橢歌沱沲河波涡渦火猓猗猡玀玻珂琐瑣疋疏疴痤瘅瘥瘰皤睃矬砣破础硪磋磨礎祸禍禾科稞窝窠窩笸箇箩簑簸籮糯綞缍罗羅羧耱脞脶臥舵舸芻苛荷莪莴菏菠萝萵蓑蔬蘑蘿蚵蛾蜗蜾蝌蝸螺蠃裸裹訛訶詛課讹诃诅课貨賀货贺跎跺蹉躲軻轲迆过逻過邏鄱酡銼鋤錯鍋鎖鏍鑼钬钶钷铊锁锄锅锇锉锕错锞锣镙阻阿陀雏雛頗顆颇颗餓饿馍馱駝驮驼骒髁魔鴕鵝鸵鹅鹾麼麽鼍',
+    e: '且些佘借偌写冶卸厍呐呗呢咧咩哩啡啤喏嗟嗲夜奢姐寫射廿惹扯捨揶斜柘椰榭歪泻瀉爷爹爺猞琊畲瘸砗社羋者耶舍芈茄蔗藉蛇謝诶谢賒赊赦赭趄車车这這遮邪野铘锗騎骑鷓鹧麝',
+    aa: '下丫乍也亚亞他价伢伽佗佤佧侉假偺傢價剐加化卅华卡卦厦叉叭吒吓吖吗吧呀呐呗呙呱咋咔咖咤咱哇哈哑哗哪啊啞啥啦喇喳嗄嗎嘉嘎嘏嘛嘩坝垭垮壩夏夸她妈姹娃娅娜媽嫁嬤嬷它家寡尕岈岔岜差巴廈廿怕扒打把拿挂挎挝掛揸搽搾撾暇杈杩杷架枷柞查栝桠桦楂榨槎樺氩氬汊汙沙洒洼渣灑灞炸煆爬爸牙牠犸猹玛珈琊琶瑕瑪瓜瓦画畫疋疤痂痄痖痧痲痳瘕码砂砑砟砬碴碼稼窪笆笮笳筢粑紗纱罅罢罵罷耍耙胍胩胯膪芭花芽苴茬茶莎華葩葭虾蚂蚜蚱蛙蜡蝦螞蟆衙衩袈裟褂訝詐詫話誇譁讶诈诖话诧豭賈贾趴跏跨踝迓迦遐那钆钯钶铊铧铪锕镎镓镲阿雅霞霸靶馇馬駕马驾骂骅髂鯊鲨鴉鸦麻',
+    i: '丝义之事二仔仕以仪伊伺似佴使侈侍依俟倚偯儀儿兒兕兹刺劓匙医卮厕厮厶只史司叽吱呢呲咝咦咨咫咿哧啻嗜嗣嗤嘁嘰噫圯址坻埘塒墀士夂夷姊始姒姨姿媸子字孜孳宜寺尔尸屍屎峙嵫已巳市师帜師幟廁廝异弑弒弛彘彝志忮思怡恃恣恥意慈懿拟持指挚搋摯撕擬支斯施旖旨时易是時智枝枳柿栀栘梓梔椅次欹止此殪氏汜池沂治泗泜洱淄滋滓漪澌炽熾爾狮猗獅玆珥瓷甾異疑疵痍痔痣痴瘗癔癡眙眦眯眵矢矣知磁示礻祀祉祗祠离私秭移稚笞笥笫篪籽粢糍紙紫絲綺緇緻纸绮缁缌置義翅而耔耜耳耻肄肆肢胝胰脂脐臍自至致芝芷苡茈茌茨茲莳蓍薏蚝蚩蛳蜘螭衣衹褫視视觜觯訑訾詞試詩誌誼諮議议词诒试诗谊谘谥豉豕豸貲貳貽資賜贰贻贽赀资赍赐趑趾踅踟踬躓輊輜轵轾辎辞辭迆迟迤迩遲邇郗酏酯酾醫錙铈铊铒铱锱锶镱雉雌頤颐飴飼饲饴馳駟驰驷髭魑鲕鲥鲻鷥鸱鸶鸷鸸鹚黟黹齒齜齿龇',
+    in: '仙仟件佃便倩偃偏健偭先免兖兗典冁冕冼前剪勉匾千卞变咽唁善嚥坚垫埏堅堰填墊天奠妍娩嫣嬗宀宪宴展岍岘峴巅巔年廛延建弁彥彦忭怜愆憐憲戋战戬戰扁扇扦掀掮掸搌搴撵擅攆旃显棉楗楝殄殿毡毽氈氙汴沔洒浅涊涎涟淀淺湎湔湮溅滇演漣澱澶濺炼烟焉然煉煎煙煸煽燃燕燹片牮牵牽犍犏献獻现現琏田电甸畋痃癜癣癫癬癲眄眠研砚砭硯碘碥碾祆秈窆笺笾筅筵箋箐箭篇籼絃綿線編緬練縯縴繕纏线练绵缅缏编缠缮缱羡羨羶翦翩肩胭胼腆腱腺腼膳膻舷芊苄苋茜茧荐莧莲菸蒇蓮蔫薦藓蘚虔蚬蜆蜒蝙蟮衍裢褊褰見见言諺謇譴變谚谝谫谳谴貶賢賤贍贤贬贱赡趼跣践跹踐踺蹁蹇躔軒輦輾轩辇辗辨辩辫辮辯边迁连連遍遣遷邊郾鄢鄯酰釆鈿銑錢鍊鍵鏈钎钐钱钿铣链锨键闐闡阏阐阗阡電霰靛面靦鞭鞯韆韉顛顫顯颠颤餞饯駢騙騫骈骗骞骟鮮鰱鱔鲜鲢鲣鳊鳝麵鼴鼹',
+    aan: '万丬丹产伞但傘僎僩兰关凡删刪剷办单反叹單嘆坂坍坛坦埏墁墦壇奸妲姍姗姦娩娴嫻孱宦寰山帆幔幡幻弯弹彈彎忐患悭惮惯慢慣憚懒懶戋扮扳拣拦拴挽掸掼揀摊撢撰擐攀攔攤攥散斑斓斕旦昝晏晚曼板枧柬栈栏栓梵棧樊檀欄歎残殘殚毯氾汎汕泛涧涮湾滩漫漶潸潺澗澜澴瀾灘灣灿炭烂烦煩熳燔燦爛爿版犯玩环珊班璨環瓒瓚瓣產畈番疝疸痫瘅瘢瘫癍癱盏盞盼眼矾硷碱碳礬笕筧简箪範篡簞簡籣粲綰綻縵繁繙繭绽绾缦缳羼翻膻臢舢舨艰艱芟范茧菅萬蔓蕃藩蘩蘭蛋蛮蠻袒袢裥襻訑訕誕諫讚讪诞谏谩谰豢販賺贊贗贩赚赝赞赧趱趼跚蹯輓辦返还還郇郸釩鈑鍰鏝鏟钒钣钽铲锏锬锾镘镧閂閑閒間闆闌關闩闲间阑阪限难雁難頑頒顏顽颁颜飯餐饅饭馒馓馔骣鬟鰥鰻鲩鳏鳗鹇鹼',
+    iu: '丟丢么乔了佻侥侨俏僑僚僥僬兆凋刁剽剿劁劭勦叫召叼吆吊哓啸喬嘌嘯嘹噍嚣囂堯夭妖妙姚娆娇婊嫖嬈嬌嬝嬲宵寥寮小少尥尧尿峤峭崾幺庙廖廟弔彪彫徭徼怊悄愀憔扰招挑挢掉揄描搖摇撂撩撬擾敫料昭晁晓暸曉曜朝杓条杪杳枭枵标桥條梟椒榣標樵橇橋橾殍沼浇消淼渺漂潇潦潮潲澆瀟灬炤烧焦照熘燎燒爝獠珧瑤瑶瓢疗瘭療眇眺瞄瞟瞧瞭矫矯硝碉礁祧票秒窈窍窑窕窯竅笑笤筱箫篠簫粜紹緲縹縿繇繚繞繳绍绕绡缈缥缭缲缴翘翹耀聊肇肖脲腰膘舀苕苗茑荛荞莩萧蓼蕉蕭藐蛲蛸蜩螵蟯表袅裊裱要覜詔誚調謠譙诏诮调谣谯貂赵超趙跳跷踔蹺轎轺轿辽迢逍遙遥遼邀邈邵醮釗釣銷錶鍬鏢鑣钊钌钓铞铥铫销锹镖镣镳雕霄鞒鞘韶頫飄飑飘飙飚饒饶驃驍驕骁骄骠髟髫魈鯈鯛鰾鲦鲷鳐鳔鳥鷂鸟鹋鹞鹩鹪龆',
+    ong: '丧亡亢仓仿伉伧倉倘倣傍傖傥儅儻光党冂冈况凰刚创剛創劻匚匡厂咣哐唐啷喪嗓噹囊囔圹坊堂塘塽壙壮壯夼奘妄妆妝妨宕尢岗岡崗巷帑帮幌幫庄床庞康廊廠廣当彷往徨徬忘忙怆恍惘惝惶愴慌慷戆房扛扩抗挡搡搪撞擋擴攮放敞方旁旷旺昂昶晃晾曠曩朗望杗杠杭枉枋桄桑档桩梆棠榔榜樁樘檔氅江汤汪沆沧況洚洸浜浪淌港湟湯溏滂滄漭潢炕烘烫煌熨燙爽状犷狀狂狼獷王琅瑭瑯璜瓤甏當疒疮瘡癀皇盎盪矿砀硭磅磉磺礦稂筐篁簧糖糠紡絳綁綱網纩纲纺绑绗绛缸网罔罡羰耥耩耪肓肛肪肮胱脏腔膀膛臟臧舡航舫舱艙芒芳苍茫茳荒荡莊莨莽菪葬蒗蒡蒼蕩藏虻蚌蝗螂螃螗螳蟒蟥行装裆裝襠訪誑謊謗講讜讲访诓诳谎谠谤豇贓贶赃趟躺輞辋逄遑邙邝邡邦郎醣釭鋼鎊鏜鐺钢钪钫铛铴锒镑镗闖闯闶阆阬防降隍韹項项颃颡饧馕驵骯髒魍鲂鳇黃黄黨龐'
+  };
+  var VOWEL_NAMES = [
+    { v: 'plane', word: '飛機', fin: ['ei', 'ei'] },
+    { v: 'mtr', word: '地鐵', fin: ['ei', 'it'] },
+    { v: 'mtr', word: '火車', fin: ['o', 'e'] },
+    { v: 'bus', word: '巴士', fin: ['aa', 'i'] },
+    { v: 'moto', word: '電單車', fin: ['in', 'aan', 'e'] },
+    { v: 'fire', word: '消防車', fin: ['iu', 'ong', 'e'] }
+  ];
+  // Never used by the vowel path (the exact path is unaffected): family words, so 爸爸 / 媽媽 + 知 / 試 / 是 can't become
+  // 巴士 (爸知, 媽知); and three very common everyday words whose vowels happen to fit a name: 多謝 (do-ze ~ 火車), 坐車
+  // (co-ce ~ 火車) and 俾 / 畀 "give" (俾幾個我 ~ 飛機). Cantonese-only colloquial characters (哋 嘢 咗 啲 嘅 …) are not in
+  // the table at all, so chatter like 你哋 / 食咗嘢 never matches either.
+  var VOWEL_SKIP = ['爸爸', '媽媽', '巴巴', '哥哥', '姐姐', '弟弟', '妹妹', '婆婆', '公公', '爺爺', '嫲嫲', '多謝', '坐車', '俾', '畀'];
+  var FINALS_OF = {};
+  Object.keys(VOWEL_FINALS).forEach(function (f) { var cs = VOWEL_FINALS[f]; for (var i = 0; i < cs.length; i++) (FINALS_OF[cs.charAt(i)] = FINALS_OF[cs.charAt(i)] || []).push(f); });
+  function finalsOf(c) { return FINALS_OF[S2T[c] || c] || FINALS_OF[c] || []; }
+  function vowelMatch(n, used) {
+    used = used ? used.slice() : [];
+    VOWEL_SKIP.forEach(function (w) { for (var at = n.indexOf(w); at >= 0; at = n.indexOf(w, at + 1)) for (var k = 0; k < w.length; k++) used[at + k] = true; });
+    var fins = []; for (var i = 0; i < n.length; i++) fins.push(used[i] ? [] : finalsOf(n.charAt(i)));
+    var best = null;
+    function consider(nm, at, from) {   // name syllables from..end placed at text position at
+      var span = nm.fin.length - from, exact = 0;
+      for (var k = 0; k < span; k++) { if (fins[at + k].indexOf(nm.fin[from + k]) < 0) return; if (n.charAt(at + k) === nm.word.charAt(from + k)) exact++; }
+      if (!best || span > best.len || (span === best.len && (exact > best.exact || (exact === best.exact && at < best.at))))
+        best = { v: nm.v, tier: 0.5, len: span, exact: exact, at: at, word: n.substr(at, span), name: nm.word, atEnd: at + span === n.length, sound: true, vowel: true };
+    }
+    VOWEL_NAMES.forEach(function (nm) {
+      for (var at = 0; at + nm.fin.length <= n.length; at++) consider(nm, at, 0);
+      if (nm.fin.length === 3) for (at = 0; at + 2 <= n.length; at++) consider(nm, at, 1);
+    });
     return best;
+  }
+  // Returns the best match { v, tier, len, at, word } or null: exact words first; only if there is none, the vowel match.
+  function matchDetail(text) {
+    var r = matchExact(text);
+    return r.best || (r.n ? vowelMatch(r.n, r.used) : null);
   }
   function better(a, b) { return a && (!b || a.tier > b.tier || (a.tier === b.tier && a.len > b.len)); }
   function matchVehicle(text) { var m = matchDetail(text); return m ? m.v : null; }
@@ -1794,6 +1855,7 @@
   window.SayAndGo = {
     APP_NAME: APP_NAME, TRIP_MS: TRIP_MS, ROUNDS_TO_END: ROUNDS_TO_END, HOLD_MS: HOLD_MS, WORDS: WORDS, LANGS: LANGS,
     match: matchVehicle, matchDetail: matchDetail, normalise: normalise, babyVariants: babyVariants,
+    matchExact: function (t) { return matchExact(t).best; }, vowelMatch: function (t) { return vowelMatch(normalise(t), []); }, finalsOf: finalsOf, VOWEL_NAMES: VOWEL_NAMES, VOWEL_SKIP: VOWEL_SKIP,
     getState: function () {
       return { screen: state.screen, mode: state.mode, rounds: state.rounds, vehicle: state.vehicle, blockedKind: state.blockedKind,
         needTap: state.needTap, talkReason: state.talkReason || null, talkVisible: !talkBtn.hidden, speaking: speaking,
