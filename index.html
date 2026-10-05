@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Say &amp; Go 嗌到我就出發</title>
 <meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」、「消防車」、「渡輪」、「救傷車」或者「的士」，或者講個英文名，睇佢出發！ Say airplane, train, bus, Motorbike, Fire truck, Ferry, ambulance or taxi.">
-<meta name="app-version" content="2026-10-05i-pad-punct">
+<meta name="app-version" content="2026-10-05j-last-one-pad">
 <meta name="theme-color" content="#4dabf7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -2027,21 +2027,27 @@
   }
   function unmentioned() { return VEHICLES.filter(function (v) { return state.mentioned.indexOf(v) < 0; }); }
   function allMentioned() { return state.mentioned.length >= VEHICLES.length; }
-  // Trio: 3 slots. Prefer vehicles not yet child-mentioned; if fewer than 3 remain,
-  // pad with the earliest-mentioned ones (state.mentioned order) until there are 3.
+  // Trio: prefer up to 3 not-yet-mentioned. Only when exactly ONE remains, pad with the
+  // two earliest-mentioned vehicles (state.mentioned[0], [1]) so the board still has three:
+  // 1 unmentioned + 2 earliest mentioned. If two remain, show just those two (no pad).
   // choices[0] = left (choice-a), [1] = centre (choice-b), [2] = right (choice-c):
   // the array order IS the on-screen left→right order; the question lists those Chinese names in that order.
   // Free choice: any of the three starts a trip (no single named target).
   function pickChoiceTrio() {
     var need = unmentioned();
-    var pool = need.slice();
-    if (pool.length < 3) {
+    var choices;
+    if (need.length >= 3) {
+      choices = shuffle(need).slice(0, 3);
+    } else if (need.length === 1) {
+      var pool = [need[0]];
       for (var mi = 0; mi < state.mentioned.length && pool.length < 3; mi++) {
         var mv = state.mentioned[mi];
         if (pool.indexOf(mv) < 0) pool.push(mv);
       }
+      choices = shuffle(pool);
+    } else {
+      choices = need.length ? shuffle(need) : [];
     }
-    var choices = pool.length ? shuffle(pool).slice(0, Math.min(3, pool.length)) : [];
     state.target = null; state.choices = choices; state.quizArmed = false;
     var list = tilesList();
     if (list) { list.classList.remove('intro-solo'); list.classList.add('choice-trio'); }
