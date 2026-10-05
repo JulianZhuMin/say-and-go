@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Say &amp; Go 嗌到我就出發</title>
 <meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」、「消防車」、「渡輪」、「救傷車」或者「的士」，或者講個英文名，睇佢出發！ Say airplane, train, bus, Motorbike, Fire truck, Ferry, ambulance or taxi.">
-<meta name="app-version" content="2026-10-05m-ask-clips">
+<meta name="app-version" content="2026-10-05n-well-done-bye">
 <meta name="theme-color" content="#4dabf7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1657,22 +1657,22 @@
 
   /* ---- pre-recorded Cantonese voice clips (edge-tts zh-HK-HiuGaaiNeural, same voice/settings as the colour game) ----
      Quiz connectors (phrase-want / phrase-or), intro & tap names (飛機 / 地鐵 / … + English), tap prompt, and goodbye
-     (home-byebye.mp3 = 「到屋企啦，bye bye！」, byebye-zh.mp3 = 「Bye bye！」). Fetched at load, decoded into the Web Audio
+     (well-done.mp3 = 「做得好好！」, byebye-zh.mp3 = 「拜拜！」 once). Fetched at load, decoded into the Web Audio
      context that the Start tap creates (so iOS lets them play). speechSynthesis is only a fallback if a clip can't load.
-     (byebye.wav, the old Piper child voice, is kept in the folder but no longer used.) */
-  var CLIP_FILES = { home: 'home-byebye.mp3', bye: 'byebye-zh.mp3', tapPrompt: 'tap-prompt.mp3',
+     (home-byebye.mp3 / byebye.wav kept in the folder but no longer used for goodbye.) */
+  var CLIP_FILES = { wellDone: 'well-done.mp3', bye: 'byebye-zh.mp3', tapPrompt: 'tap-prompt.mp3',
     plane: 'name-plane.mp3', mtr: 'name-mtr.mp3', bus: 'name-bus.mp3', moto: 'name-moto.mp3', fire: 'name-fire.mp3', ferry: 'name-ferry.mp3', ambulance: 'name-ambulance.mp3', taxi: 'name-taxi.mp3',
     'plane-en': 'name-plane-en.mp3', 'mtr-en': 'name-mtr-en.mp3', 'bus-en': 'name-bus-en.mp3', 'moto-en': 'name-moto-en.mp3', 'fire-en': 'name-fire-en.mp3', 'ferry-en': 'name-ferry-en.mp3', 'ambulance-en': 'name-ambulance-en.mp3', 'taxi-en': 'name-taxi-en.mp3',
     wantRide: 'phrase-want.mp3', orWord: 'phrase-or.mp3',
     // Quiz question: same HiuGaai voice as intro — phrase-want + name-* + phrase-or (not system TTS)
     blockedUnsupported: 'help-unsupported.mp3', blockedDenied: 'help-denied.mp3', blockedService: 'help-service.mp3', blockedNomic: 'help-nomic.mp3' };
   var APP_VERSION = (document.querySelector('meta[name="app-version"]') || {}).content || '';
-  var BYE_CLIPS = { home: { say: '到屋企啦，拜拜！' }, bye: { say: '拜拜！' } };
+  var BYE_CLIPS = { wellDone: { say: '做得好好！' }, bye: { say: '拜拜！' } };
   var clips = {}, byeVoice = { state: 'loading', clips: clips };
   var clipsForceFailed = false;
   Object.keys(CLIP_FILES).forEach(function (k) { clips[k] = { data: null, buffer: null, state: 'loading' }; });
   function byeOverall() {
-    var st = ['home', 'bye'].map(function (k) { return clips[k].state; });
+    var st = ['wellDone', 'bye'].map(function (k) { return clips[k].state; });
     byeVoice.state = st.every(function (x) { return x === 'ready'; }) ? 'ready' : st.indexOf('failed') >= 0 ? 'failed' : st.indexOf('loading') >= 0 ? 'loading' : 'fetched';
   }
   function clipStates() { var o = {}; Object.keys(clips).forEach(function (k) { o[k] = clips[k].state; }); return o; }
@@ -1698,9 +1698,9 @@
   });
   var byeSources = [];
   function stopBye() { byeSources.forEach(function (s) { try { s.stop(); } catch (e) { /* ignore */ } }); byeSources = []; }
-  // Plays clip `which` ('home' or 'bye') after `delay` seconds; returns its length in seconds (estimate for the fallback).
+  // Plays clip `which` ('wellDone' or 'bye') after `delay` seconds; returns its length in seconds (estimate for the fallback).
   function playBye(delay, which) {
-    which = which || 'home';
+    which = which || 'wellDone';
     stats.voice.bye++;
     var c = clips[which];
     if (ensureAudio() && master && c && c.buffer) {
@@ -2319,9 +2319,9 @@
     state.screen = 'goodbye'; state.vehicle = null;
     show(goodbye); stage.hidden = true; document.body.classList.remove('tripping');
     focusEl(byeTitle);
-    announce(zh('拜拜！八架車都講晒，好叻！家長可以用右上角「再玩過」掣。') + ' ' + en('Bye bye! You named all eight, well done. Parents: the Play again button is at the top right.'));
-    var homeLen = playBye(0.3, 'home');                       // 「到屋企啦，bye bye！」
-    byeTimers.push(setTimeout(function () { if (state.screen === 'goodbye') playBye(0, 'bye'); }, (0.3 + homeLen + 0.7) * 1000));   // then one more 「Bye bye！」
+    announce(zh('做得好好！拜拜！八架車都講晒。家長可以用右上角「再玩過」掣。') + ' ' + en('Well done! Bye bye! You named all eight. Parents: the Play again button is at the top right.'));
+    var wellLen = playBye(0.3, 'wellDone');                   // 「做得好好！」
+    byeTimers.push(setTimeout(function () { if (state.screen === 'goodbye') playBye(0, 'bye'); }, (0.3 + wellLen + 0.5) * 1000));   // then one 「拜拜！」
     updateIndicator();
   }
   function playAgain() {
