@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Say &amp; Go 嗌到我就出發</title>
 <meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」、「消防車」、「渡輪」、「救傷車」或者「的士」，或者講個英文名，睇佢出發！ Say airplane, train, bus, Motorbike, Fire truck, Ferry, ambulance or taxi.">
-<meta name="app-version" content="2026-10-05l-ferry-horn">
+<meta name="app-version" content="2026-10-05m-ask-clips">
 <meta name="theme-color" content="#4dabf7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1656,14 +1656,15 @@
   }
 
   /* ---- pre-recorded Cantonese voice clips (edge-tts zh-HK-HiuGaaiNeural, same voice/settings as the colour game) ----
-     The question, the tap-a-picture / intro names (飛機 / 地鐵 / 巴士 / 電單車 / 消防車 / 渡輪 + English airplane / train / Bus / Motorbike / Fire truck / Ferry) and the goodbye
+     Quiz connectors (phrase-want / phrase-or), intro & tap names (飛機 / 地鐵 / … + English), tap prompt, and goodbye
      (home-byebye.mp3 = 「到屋企啦，bye bye！」, byebye-zh.mp3 = 「Bye bye！」). Fetched at load, decoded into the Web Audio
      context that the Start tap creates (so iOS lets them play). speechSynthesis is only a fallback if a clip can't load.
      (byebye.wav, the old Piper child voice, is kept in the folder but no longer used.) */
   var CLIP_FILES = { home: 'home-byebye.mp3', bye: 'byebye-zh.mp3', tapPrompt: 'tap-prompt.mp3',
     plane: 'name-plane.mp3', mtr: 'name-mtr.mp3', bus: 'name-bus.mp3', moto: 'name-moto.mp3', fire: 'name-fire.mp3', ferry: 'name-ferry.mp3', ambulance: 'name-ambulance.mp3', taxi: 'name-taxi.mp3',
     'plane-en': 'name-plane-en.mp3', 'mtr-en': 'name-mtr-en.mp3', 'bus-en': 'name-bus-en.mp3', 'moto-en': 'name-moto-en.mp3', 'fire-en': 'name-fire-en.mp3', 'ferry-en': 'name-ferry-en.mp3', 'ambulance-en': 'name-ambulance-en.mp3', 'taxi-en': 'name-taxi-en.mp3',
-    // ask-* unused: quiz question is one TTS Cantonese sentence listing the three Chinese names
+    wantRide: 'phrase-want.mp3', orWord: 'phrase-or.mp3',
+    // Quiz question: same HiuGaai voice as intro — phrase-want + name-* + phrase-or (not system TTS)
     blockedUnsupported: 'help-unsupported.mp3', blockedDenied: 'help-denied.mp3', blockedService: 'help-service.mp3', blockedNomic: 'help-nomic.mp3' };
   var APP_VERSION = (document.querySelector('meta[name="app-version"]') || {}).content || '';
   var BYE_CLIPS = { home: { say: '到屋企啦，拜拜！' }, bye: { say: '拜拜！' } };
@@ -2138,8 +2139,9 @@
     }, QUIZ_MISS_MS);
   }
   // Each round: show trio → ONE Cantonese sentence listing the three Chinese names L→R
-  // (「你想坐A、B，定係C？」; TTS skips punctuation). As each name is spoken its figure highlights, then clears; after the
-  // question ends all three are neutral while listening. Free choice among the three; TTS (no ask-* clips).
+  // (「你想坐A、B，定係C？」). Same recorded HiuGaai voice as the intro (phrase-want + name-* + phrase-or);
+  // punctuation segments are silent gaps. As each name is spoken its figure highlights, then clears; after the
+  // question ends all three are neutral while listening. Free choice among the three.
   function askRideChoice() {
     if (state.screen !== 'cover') return;
     if (allMentioned()) { goToGoodbye(); return; }
@@ -2151,19 +2153,19 @@
     state.narrating = true;
     announce(zh(sentence));
     // Speak in segments so highlight can track each vehicle name, then clear when that name ends.
-    var parts = [{ text: '你想坐' }];
+    var parts = [{ text: '你想坐', clip: 'wantRide' }];
     if (choices.length === 1) {
-      parts.push({ text: SAY_NAME[choices[0]], v: choices[0] });
+      parts.push({ text: SAY_NAME[choices[0]], v: choices[0], clip: choices[0] });
     } else if (choices.length === 2) {
-      parts.push({ text: SAY_NAME[choices[0]], v: choices[0] });
-      parts.push({ text: '，定係' });
-      parts.push({ text: SAY_NAME[choices[1]], v: choices[1] });
+      parts.push({ text: SAY_NAME[choices[0]], v: choices[0], clip: choices[0] });
+      parts.push({ text: '定係', clip: 'orWord' });
+      parts.push({ text: SAY_NAME[choices[1]], v: choices[1], clip: choices[1] });
     } else {
-      parts.push({ text: SAY_NAME[choices[0]], v: choices[0] });
+      parts.push({ text: SAY_NAME[choices[0]], v: choices[0], clip: choices[0] });
       parts.push({ text: '、' });
-      parts.push({ text: SAY_NAME[choices[1]], v: choices[1] });
-      parts.push({ text: '，定係' });
-      parts.push({ text: SAY_NAME[choices[2]], v: choices[2] });
+      parts.push({ text: SAY_NAME[choices[1]], v: choices[1], clip: choices[1] });
+      parts.push({ text: '定係', clip: 'orWord' });
+      parts.push({ text: SAY_NAME[choices[2]], v: choices[2], clip: choices[2] });
     }
     parts.push({ text: '？' });
     var i = 0;
@@ -2177,20 +2179,22 @@
       }
       var p = parts[i++];
       if (p.v) {
-        sayFocused(p.v, p.text, { rate: 0.9, pitch: 1.25 }, 'ask', function () {
+        sayFocused(p.v, p.text, { rate: 0.9, pitch: 1.25, clip: p.clip || p.v }, 'ask', function () {
           if (!alive()) return;
           clearIntroFocus();   // name finished → clear highlight before next segment
           tripTimers.push(setTimeout(nextPart, TRIO_GAP_MS));
         });
       } else {
-        // Question connectors: never speak punctuation aloud (、 ， ？ etc.) — only the words.
+        // Connectors: recorded phrase clips when available; bare punctuation is a short silent gap.
         clearIntroFocus();
-        var spoken = String(p.text || '').replace(/[\u3001\u3002\uff0c\uff1f\uff01\uff1a\uff1b\u2014\u2026.,!?:;\-\[\]()"'「」『』]/g, '');
-        if (!spoken) {
+        var spoken = String(p.text || '').replace(/[\u3001\u3002\uff0c\uff1f\uff01\uff1a\uff1b\u2014\u2026.,!?:;\-\[\]()"'\u300c\u300d\u300e\u300f]/g, '');
+        if (!spoken && !p.clip) {
           tripTimers.push(setTimeout(nextPart, 60));
           return;
         }
-        say(spoken, { rate: 0.9, pitch: 1.25 }, function () {
+        var opts = { rate: 0.9, pitch: 1.25 };
+        if (p.clip) opts.clip = p.clip;
+        say(spoken || p.text, opts, function () {
           if (!alive()) return;
           nextPart();
         });
