@@ -38,7 +38,7 @@ After a slow one-by-one bilingual intro (random order; each figure alone, highli
    - three: 「你想坐{左}、{中}，定係{右}？」
    - two: 「你想坐{甲}，定係{乙}？」
    - one: 「你想坐{甲}？」
-   Spoken with TTS (no `ask-*` clips). VoiceOver announces the same Chinese sentence.
+   Spoken with the same pre-recorded HiuGaai clips as the intro (`phrase-want` + `name-*` + `phrase-or`). VoiceOver announces the same Chinese sentence.
 3. While the sentence plays, as each vehicle **name** is spoken that figure highlights, then clears when the name ends; the next name lights the next figure. After the question ends / while listening, **no** highlights — all three stay the same neutral state.
 4. **Any** of the three on-screen vehicles (correct Chinese name or alias) starts that vehicle’s trip and counts as named-by-child. Names outside the three are ignored. ~7 s silence / wrong → next round (no teach-back).
 5. Tap a card during the 7 s: it says its zh + en name (highlighted), no trip, does not count; the 7 s restart.
