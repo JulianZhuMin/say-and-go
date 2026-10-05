@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Say &amp; Go 嗌到我就出發</title>
 <meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」、「消防車」、「渡輪」、「救傷車」或者「的士」，或者講個英文名，睇佢出發！ Say airplane, train, bus, Motorbike, Fire truck, Ferry, ambulance or taxi.">
-<meta name="app-version" content="2026-10-05s-ferry-horn">
+<meta name="app-version" content="2026-10-05t-listen-now">
 <meta name="theme-color" content="#4dabf7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1797,14 +1797,19 @@
     if (saySrc) { try { saySrc.stop(); } catch (e) { /* ignore */ } saySrc = null; }
     if (speaking) { speaking = false; try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } }
   }
-  // Speak Cantonese; `done` runs ~0.3 s after it finishes (listening is paused meanwhile so the game can't hear itself).
+  // Speak Cantonese; `done` runs after it finishes. opts.afterMs (default 80) is a tiny pad so the mic
+  // does not catch the tail of the clip; ask-path uses afterMs: 0 so listening starts the instant the question ends.
   function say(text, opts, done) {
     opts = opts || {};
     stopSpeaking();
     var gen = sayGen, finished = false;
+    var afterMs = (opts.afterMs != null) ? opts.afterMs : 80;
     function fin() {
       if (finished || gen !== sayGen) return; finished = true; clearTimeout(sayTimer); speaking = false; updateIndicator();
-      if (done) setTimeout(function () { if (gen === sayGen) done(); }, 300);
+      if (done) {
+        if (afterMs <= 0) { if (gen === sayGen) done(); }
+        else setTimeout(function () { if (gen === sayGen) done(); }, afterMs);
+      }
     }
     var clip = opts.clip && clips[opts.clip];
     if (clip && !clip.buffer && clip.state !== 'failed' && !opts.waited) {   // clip still loading/decoding: wait (up to ~2 s) rather than use the system voice
@@ -2272,36 +2277,39 @@
       parts.push({ text: '定係', clip: 'orWord' });
       parts.push({ text: SAY_NAME[choices[2]], v: choices[2], clip: choices[2] });
     }
-    parts.push({ text: '？' });
+    // 2026-10-05t: no trailing 「？」 speech step — open the mic the instant the last name clip ends.
     var i = 0;
+    function beginListening() {
+      if (state.screen !== 'cover' || !state.choices) return;
+      state.narrating = false; clearIntroFocus();
+      armQuizMissTimer();
+      listen(false);
+    }
     function nextPart() {
       if (!alive()) return;
-      if (i >= parts.length) {
-        state.narrating = false; clearIntroFocus();
-        armQuizMissTimer();
-        listen(false);
-        return;
-      }
+      if (i >= parts.length) { beginListening(); return; }
       var p = parts[i++];
+      var last = (i >= parts.length);
       if (p.v) {
-        sayFocused(p.v, p.text, { rate: 0.9, pitch: 1.25, clip: p.clip || p.v }, 'ask', function () {
+        sayFocused(p.v, p.text, { rate: 0.9, pitch: 1.25, clip: p.clip || p.v, afterMs: last ? 0 : 40 }, 'ask', function () {
           if (!alive()) return;
-          clearIntroFocus();   // name finished → clear highlight before next segment
-          tripTimers.push(setTimeout(nextPart, TRIO_GAP_MS));
+          clearIntroFocus();
+          if (last) beginListening();
+          else tripTimers.push(setTimeout(nextPart, TRIO_GAP_MS));
         });
       } else {
-        // Connectors: recorded phrase clips when available; bare punctuation is a short silent gap.
         clearIntroFocus();
         var spoken = String(p.text || '').replace(/[\u3001\u3002\uff0c\uff1f\uff01\uff1a\uff1b\u2014\u2026.,!?:;\-\[\]()"'\u300c\u300d\u300e\u300f]/g, '');
         if (!spoken && !p.clip) {
-          tripTimers.push(setTimeout(nextPart, 60));
+          tripTimers.push(setTimeout(nextPart, 40));
           return;
         }
-        var opts = { rate: 0.9, pitch: 1.25 };
+        var opts = { rate: 0.9, pitch: 1.25, afterMs: last ? 0 : 40 };
         if (p.clip) opts.clip = p.clip;
         say(spoken || p.text, opts, function () {
           if (!alive()) return;
-          nextPart();
+          if (last) beginListening();
+          else nextPart();
         });
       }
     }
