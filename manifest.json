@@ -1,6 +1,6 @@
 {
-  "name": "Say & Go 嗌我就出發",
-  "short_name": "嗌我就出發",
+  "name": "Say & Go 嗌到我就出發",
+  "short_name": "嗌到我就出發",
   "description": "講「飛機」、「地鐵」、「巴士」、「電單車」、「消防車」、「渡輪」、「救傷車」或者「的士」，或者講個英文名，睇佢出發！ Say airplane, train, bus, Motorbike, Fire truck, Ferry, ambulance or taxi.",
   "start_url": "./",
   "scope": "./",
