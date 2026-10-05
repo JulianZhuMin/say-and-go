@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Say &amp; Go 嗌到我就出發</title>
 <meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」、「消防車」、「渡輪」、「救傷車」或者「的士」，或者講個英文名，睇佢出發！ Say airplane, train, bus, Motorbike, Fire truck, Ferry, ambulance or taxi.">
-<meta name="app-version" content="2026-10-05o-ask-audio">
+<meta name="app-version" content="2026-10-05p-trip-bilingual">
 <meta name="theme-color" content="#4dabf7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -547,21 +547,48 @@
     #mic-big svg, #mic-big .mic-glow, #mic-big .mic-waves path { animation: none; }
     #mic-big .mic-glow, #mic-big .mic-waves path { opacity: .9; }
     .tile { transition-duration: .15s; }
-    #stage .scene, #stage .scene *, #stage .mover * { animation: none !important; }
-    #stage .scene { animation: rm-fade var(--dur, 3s) ease both !important; }
-    #stage .mover { animation: rm-fade var(--dur, 3s) ease both !important; transform: none !important; }
-    #stage .mover-mtr, #stage .mover-bus, #stage .mover-moto, #stage .mover-fire, #stage .mover-ferry, #stage .mover-ambulance, #stage .mover-taxi { left: 50%; }
-    #stage .mover-mtr { margin-left: calc(min(100vmin, 760px) / -2); }
-    #stage .mover-bus { margin-left: calc(min(70vmin, 540px) / -2); }
-    #stage .mover-moto { margin-left: calc(min(64vmin, 500px) / -2); }
-    #stage .mover-fire { margin-left: calc(min(78vmin, 600px) / -2); }
-    #stage .mover-ferry { margin-left: calc(min(78vmin, 620px) / -2); bottom: 18vh; }
-    #stage .mover-ambulance { margin-left: calc(min(72vmin, 560px) / -2); }
-    #stage .mover-taxi { margin-left: calc(min(64vmin, 500px) / -2); }
+    /* 2026-10-05p: the vehicle still drives / flies across on a right answer (the trip IS the reward);
+       only the decorative loops slow down. */
+    #stage .wheel, #stage .puff, #stage .speed-lines path, #stage .road-line { animation-duration: 1.2s !important; }
+    #trip-banner { animation: none !important; }
+    #rotate svg { animation: none; transform: rotate(-90deg); }
     .arm-wave { animation-duration: 1.8s; }
     .wave-lines, .float-heart { animation: none; }
   }
   @keyframes rm-fade { 0% { opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { opacity: 0; } }
+
+  /* ---------- Trip banner (2026-10-05p): the departure line on screen, Chinese with English below ---------- */
+  #trip-banner {
+    position: fixed; z-index: 6; left: 50%; top: max(12px, env(safe-area-inset-top)); transform: translateX(-50%);
+    max-width: min(92vw, 760px); padding: .35em 1.1em .45em; border-radius: 28px; text-align: center;
+    background: rgba(255,255,255,.94); box-shadow: 0 6px 18px rgba(28,61,143,.25); border: 4px solid #ffd43b;
+    color: #1c3d8f; pointer-events: none; animation: banner-pop .45s cubic-bezier(.2,1.5,.4,1) both;
+  }
+  #trip-banner .zh { display: block; font-size: clamp(24px, 7vmin, 60px); font-weight: 900; line-height: 1.15; }
+  #trip-banner .en { display: block; font-size: clamp(14px, 3.4vmin, 28px); font-weight: 800; color: #364fc7; line-height: 1.2; margin-top: .15em; }
+  @keyframes banner-pop { from { opacity: 0; transform: translateX(-50%) scale(.6); } to { opacity: 1; transform: translateX(-50%) scale(1); } }
+
+  /* ---------- Bilingual: English directly under the Chinese ---------- */
+  #cover-title .en { display: block; margin-left: 0; margin-top: .1em; }
+  .cover-hint [lang="en"], .bye-sub [lang="en"], #again-confirm [lang="en"], #start-status .en, #heard .en { display: block; }
+  #again-confirm [lang="en"] { font-size: .85em; font-weight: 700; }
+  #again-btn { flex-wrap: wrap; } #again-btn .txt { display: flex; flex-direction: column; line-height: 1.05; text-align: left; }
+  #again-btn .txt [lang="en"] { font-size: .8em; }
+  #mic-ind-text { display: flex; flex-direction: column; line-height: 1.05; }
+  #mic-ind-text .en { font-size: 12px; font-weight: 700; opacity: .85; }
+  #blocked .en-help { margin-top: .15em; }
+  #bye-title [lang="en"] { display: block; font-size: .5em; }
+
+  /* ---------- Rotate hint (portrait), same as the other games ---------- */
+  #rotate { display: none; position: fixed; left: 50%; bottom: max(10px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 8;
+    width: max-content; max-width: 94vw; align-items: center; gap: 10px; padding: 6px 16px; border-radius: 22px; background: #fff; border: 3px solid #74c0fc;
+    font-size: 16px; font-weight: 800; color: #1c3d8f; box-shadow: 0 6px 18px rgba(0,0,0,.12); pointer-events: none; }
+  #rotate svg { width: 30px; height: 30px; flex: 0 0 auto; animation: tilt 2.4s ease-in-out infinite; }
+  #rotate .txt { display: flex; flex-direction: column; line-height: 1.15; text-align: left; }
+  #rotate .en { font-size: 13px; font-weight: 700; color: #364fc7; }
+  @keyframes tilt { 0%,30% { transform: rotate(0); } 60%,100% { transform: rotate(-90deg); } }
+  @media (min-aspect-ratio: 4/5) and (max-height: 520px) { #mic-ind-text { display: none; } }
+  @media (orientation: portrait) { body.on-cover #rotate { display: flex; } body.on-cover.tripping #rotate, body.on-cover.talk-shown #rotate { display: none; } }
 </style>
 </head>
 <body>
@@ -899,7 +926,7 @@
 
   <!-- ===== 2. Cover: five big pictures around a big toy microphone; listens for 飛機 / 地鐵 / 巴士 / 電單車 / 消防車 ===== -->
   <main id="cover" class="screen" hidden aria-labelledby="cover-title">
-    <div id="mic-ind" data-s="off" aria-hidden="true"><span class="dot"></span><span id="mic-ind-text">未聽</span></div>
+    <div id="mic-ind" data-s="off" aria-hidden="true"><span class="dot"></span><span id="mic-ind-text"><span class="zh">未聽</span><span class="en" lang="en">Not listening</span></span></div>
     <h1 id="cover-title" tabindex="-1">你想坐咩呀？<span class="en" lang="en">What would you like to ride?</span></h1>
     <p class="cover-hint" id="cover-hint">講啱問緊嗰隻就出發；撳圖聽名。 <span lang="en">Say the one I ask for and it goes! Tap to hear a name.</span></p>
     <div class="play">
@@ -986,10 +1013,19 @@
     <div class="mover mover-taxi"><div class="taxi-tilt"></div></div>
   </div>
 
+  <!-- Trip banner: the departure line, Chinese + English (VoiceOver hears the same line from the live region) -->
+  <div id="trip-banner" hidden aria-hidden="true"><span class="zh" lang="zh-HK" id="trip-zh"></span><span class="en" lang="en" id="trip-en"></span></div>
+
+  <!-- Rotate hint (portrait only, on the game screen) -->
+  <div id="rotate" role="note">
+    <svg viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="12" y="4" width="16" height="30" rx="4" fill="#fff" stroke="#1c3d8f" stroke-width="3"/><circle cx="20" cy="29" r="1.8" fill="#1c3d8f"/></svg>
+    <span class="txt"><span class="zh">打橫部機，會更好玩！</span><span class="en" lang="en">Turn the phone sideways — it's more fun!</span></span>
+  </div>
+
   <!-- ===== Help screen: microphone denied / speech recognition not available ===== -->
   <main id="blocked" class="screen" hidden aria-labelledby="blocked-title">
     <div class="panel">
-      <h1 id="blocked-title" tabindex="-1"><span id="blocked-zh">用唔到咪高峰</span><span class="en" lang="en" id="blocked-en">Can't use the microphone</span></h1>
+      <h1 id="blocked-title" tabindex="-1"><span id="blocked-zh" style="display:block">用唔到咪高峰</span><span class="en" lang="en" id="blocked-en">Can't use the microphone</span></h1>
       <ul>
         <li>iPhone／iPad：請用 Safari 開呢個網頁。去「設定」開啟「Siri」同「聽寫」（設定 → 一般 → 鍵盤 → 啟用聽寫）。Safari 問可唔可以用咪高峰同語音辨識，請撳「允許」。
           <span class="en-help" lang="en">iPhone/iPad: open this page in Safari. Turn on Siri and Dictation in Settings (Settings → General → Keyboard → Enable Dictation). Tap Allow when Safari asks for the microphone and speech recognition.</span></li>
@@ -1036,7 +1072,7 @@
     <h1 id="bye-title" tabindex="-1"><span class="zh">拜拜！</span><span lang="en">Bye bye!</span></h1>
     <p class="bye-sub">玩咗三次，好叻！ <span lang="en">Three rides, well done!</span></p>
     <button type="button" id="again-btn" aria-describedby="again-help">
-      <span aria-hidden="true">↻</span><span>再玩過</span> <span lang="en">Play again</span>
+      <span aria-hidden="true">↻</span><span class="txt"><span>再玩過</span><span lang="en">Play again</span></span>
     </button>
     <p id="again-help" class="sr-only">家長用：會先問你確認。<span lang="en">Parent control: asks you to confirm. Sighted parents can also press and hold for 1.5 seconds.</span></p>
 
@@ -1082,6 +1118,8 @@
   function askZh(v) { return '你想坐' + SAY_NAME[v] + '？'; }   // legacy helper; quiz uses askQuestionZh
   function askEn(v) { return 'Do you want the ' + SAY_EN[v] + '?'; }
   var TRIP_ZH = { plane: '飛機起飛喇！飛呀飛！', mtr: '地鐵嚟喇，開門喇，嘟嘀！', bus: '巴士嚟喇，叮叮，到站喇！', moto: '電單車嚟喇，轟轟轟！', fire: '消防車嚟喇，嘀嘟嘀嘟！', ferry: '渡輪嚟喇，嘟嘟，過海喇！', ambulance: '救傷車嚟喇，嘀嘟嘀嘟，救人喇！', taxi: '的士嚟喇，嘟嘟，走喇！' };
+  // On-screen banner English (a direct translation of TRIP_ZH, shown under the Chinese line during the trip)
+  var TRIP_EN_BANNER = { plane: 'The plane takes off! Fly, fly!', mtr: 'The train is here. Doors open, do-di!', bus: 'The bus is here. Ding ding, bus stop!', moto: 'The motorbike is here. Vroom vroom vroom!', fire: 'The fire truck is here. Dee-daa dee-daa!', ferry: 'The ferry is here. Toot toot, across the harbour!', ambulance: 'The ambulance is here. Dee-daa, off to help!', taxi: 'The taxi is here. Toot toot, off we go!' };
   var TRIP_EN = { plane: 'The plane takes off and swoops around the sky!', mtr: 'The train glides in, opens its doors with a do-di chime, and glides off!', bus: 'The double-decker bus pulls up at the bus stop, ding ding, toots its horn and drives off!', moto: 'The motorbike revs vroom vroom and zooms off down the road!', fire: 'The fire truck drives up with its siren going dee-daa dee-daa, stops, and drives off!', ferry: 'The green-and-white harbour ferry sails across the water, toots its horn, and chugs off!', ambulance: 'The white ambulance drives up with its siren, stops to help, and drives off!', taxi: 'The red Hong Kong taxi pulls up, toots its horn, and drives off!' };
 
   /* ===================== word matching (lenient, for ~3-year-olds) =====================
@@ -1603,9 +1641,6 @@
     })();
     cleanup(nodes, d);
   }
-  function playTripSound(v) {
-    if (!ensureAudio() || !master) { stats.sounds.push(v + ':none'); return; }
-    
   function soundAmbulance() {
     var d = TRIP_MS.ambulance / 1000, t0 = ctx.currentTime + 0.03, nodes = [];
     var pan = ctx.createStereoPanner ? ctx.createStereoPanner() : ctx.createGain();
@@ -1644,7 +1679,30 @@
     });
     cleanup(nodes, d);
   }
-    try { ({ plane: soundPlane, mtr: soundMtr, bus: soundBus, moto: soundMoto, fire: soundFire, ferry: soundFerry, ambulance: soundAmbulance, taxi: soundTaxi })[v](); stats.sounds.push(v); } catch (e) { stats.sounds.push(v + ':error'); }
+  var TRIP_SOUNDS = { plane: soundPlane, mtr: soundMtr, bus: soundBus, moto: soundMoto, fire: soundFire, ferry: soundFerry, ambulance: soundAmbulance, taxi: soundTaxi };
+  /* Trip sound effect (2026-10-05p). On iPhone the AudioContext can be left 'suspended' / 'interrupted' for a moment
+     after the microphone stops (startTrip has just aborted recognition), and sounds scheduled on a stopped clock are
+     silent. So: resume the context, wait (max ~0.7 s) until it is really running, then play. If it never reports
+     'running', play anyway (better a late/quiet sound than none). */
+  function playTripSound(v) {
+    if (!ensureAudio() || !master) { stats.sounds.push(v + ':none'); return; }
+    var fired = false, t0 = now(), polls = 0;
+    function fire(how) {
+      if (fired) return; fired = true;
+      if (state.screen !== 'trip' || state.vehicle !== v) { stats.sounds.push(v + ':skipped'); return; }
+      try { TRIP_SOUNDS[v](); stats.sounds.push(how ? v + ':' + how : v); } catch (e) { stats.sounds.push(v + ':error'); }
+    }
+    if (ctx.state === 'running') { fire(''); return; }
+    function tryResume() { try { var p = ctx.resume(); if (p && p.then) p.then(check, check); } catch (e) { /* ignore */ } }
+    function check() {
+      if (fired) return;
+      if (ctx.state === 'running') { fire('resumed'); return; }
+      if (now() - t0 > 700) { fire('late-' + ctx.state); return; }
+      if (++polls % 3 === 0) tryResume();
+      setTimeout(check, 100);
+    }
+    tryResume();
+    setTimeout(check, 60);
   }
   function playDing() {   // short "listening again" chime
     if (!ensureAudio() || !master) return;
@@ -1921,7 +1979,7 @@
     // 'no-speech', 'aborted', 'network': onend follows and listening restarts
   }
   function onRecEnd() {
-    if (state.screen === 'start') { startStatus.textContent = '再撳一次「開始」 Tap Start again'; return; }
+    if (state.screen === 'start') { startStatus.innerHTML = '再撳一次「開始」<span class="en" lang="en">Tap Start again</span>'; return; }
     if (!rec.wanted || !canListen()) { updateIndicator(); return; }
     // iOS stops after a pause: restart. Guard against a tight loop of instant ends.
     if (now() - rec.startedAt < 1200) rec.quickEnds++; else rec.quickEnds = 0;
@@ -1977,7 +2035,14 @@
   }
 
   /* ===================== indicator + Talk button ===================== */
-  function setInd(s, text) { micInd.setAttribute('data-s', s); micIndText.textContent = text; updateBigMic(); }
+  function setInd(s, text) {
+    var m = /^(.*?)\s+([A-Za-z].*)$/.exec(text || ''), zhT = m ? m[1] : text, enT = m ? m[2] : '';
+    if (micInd.getAttribute('data-s') !== s || micIndText.getAttribute('data-t') !== text) {
+      micIndText.setAttribute('data-t', text);
+      micIndText.innerHTML = '<span class="zh">' + zhT + '</span>' + (enT ? '<span class="en" lang="en">' + enT + '</span>' : '');
+    }
+    micInd.setAttribute('data-s', s); updateBigMic();
+  }
   // Big microphone picture: visible only while recognition has really begun (onstart/onaudiostart) and not ended or errored,
   // on the cover, in voice mode, and not while the game is talking, paused or on a trip. No live region: silent for VoiceOver.
   var micErr = false;
@@ -1998,11 +2063,11 @@
   }
   function showTalk(reason) {
     srAbort(); rec.wanted = false; state.needTap = true; state.talkReason = reason;
-    if (state.screen === 'cover') talkBtn.hidden = false;
+    if (state.screen === 'cover') { talkBtn.hidden = false; document.body.classList.add('talk-shown'); }
     updateIndicator();
     if (reason !== 'idle') announce(zh('撳「講嘢」掣，再開始聽。') + ' ' + en('Tap the Talk button to listen again.'));
   }
-  function hideTalk() { state.needTap = false; talkBtn.hidden = true; }
+  function hideTalk() { state.needTap = false; talkBtn.hidden = true; document.body.classList.remove('talk-shown'); }
   talkBtn.addEventListener('click', function () {
     ensureAudio(); stopSpeaking(); hideTalk(); rec.retry = 0; rec.quickEnds = 0;
     playDing();
@@ -2010,12 +2075,12 @@
   });
 
   /* ===================== screens ===================== */
-  function show(el) { [startScr, cover, blocked, goodbye].forEach(function (s) { s.hidden = s !== el; }); }
+  function show(el) { [startScr, cover, blocked, goodbye].forEach(function (s) { s.hidden = s !== el; }); document.body.classList.toggle('on-cover', el === cover); }
   startBtn.addEventListener('click', function () {
     ensureAudio(); unlockSpeech();
     state.mode = 'voice'; startStatus.textContent = '';
     if (!SR) { showBlocked('unsupported'); return; }
-    startStatus.textContent = '等緊你允許咪高峰… Waiting for microphone permission…';
+    startStatus.innerHTML = '等緊你允許咪高峰…<span class="en" lang="en">Waiting for microphone permission…</span>';
     announce(zh('請允許用咪高峰。') + ' ' + en('Please allow the microphone.'));
     if (!srStart(true)) showBlocked('unsupported');
   });
@@ -2239,7 +2304,7 @@
     opts = opts || {};
     clearTripTimers(); clearQuizTimer(); cancelAllHolds(); againDialog.close(true); clearIntroFocus();
     state.screen = 'cover'; state.vehicle = null; state.quizArmed = false; state.narrating = false;
-    show(cover); stage.hidden = true; document.body.classList.remove('tripping');
+    show(cover); stage.hidden = true; hideTripBanner(); document.body.classList.remove('tripping');
     tiles.forEach(function (t) { t.classList.remove('chosen'); });
     if (opts.first || opts.reset) {
       heard.textContent = ''; focusEl(coverTitle);
@@ -2264,6 +2329,23 @@
 
   var tripTimers = [];
   function clearTripTimers() { tripTimers.forEach(clearTimeout); tripTimers = []; }
+  var tripBanner = $('trip-banner'), tripZh = $('trip-zh'), tripEn = $('trip-en');
+  function showTripBanner(v) {
+    tripZh.textContent = TRIP_ZH[v] || ''; tripEn.textContent = TRIP_EN_BANNER[v] || '';
+    tripBanner.hidden = true; void tripBanner.offsetWidth; tripBanner.hidden = false;   // replays the pop-in every trip
+  }
+  function hideTripBanner() { tripBanner.hidden = true; }
+  // Restart every CSS animation on the stage, so the 2nd, 3rd ... trip moves exactly like the first one.
+  function restartStage(v) {
+    stage.hidden = true; stage.removeAttribute('data-v');
+    void stage.offsetWidth;                                   // reflow: the old animations are dropped
+    stage.style.setProperty('--dur', TRIP_MS[v] + 'ms');
+    stage.setAttribute('data-v', v); stage.hidden = false;
+    void stage.offsetWidth;
+    try {
+      if (stage.getAnimations) stage.getAnimations({ subtree: true }).forEach(function (a) { try { a.currentTime = 0; a.play(); } catch (e) { /* ignore */ } });
+    } catch (e) { /* ignore */ }
+  }
   function startTrip(v, said) {
     if (state.screen !== 'cover' || state.mode !== 'voice') return;
     unlisten(); stopSpeaking(); clearTripTimers(); clearQuizTimer(); state.quizArmed = false;
@@ -2272,16 +2354,16 @@
     stats.trips.push({ v: v, said: said || '' });
     tiles.forEach(function (t) { t.classList.toggle('chosen', t.getAttribute('data-v') === v); });
     document.body.classList.add('tripping');
-    stage.style.setProperty('--dur', TRIP_MS[v] + 'ms');
-    stage.setAttribute('data-v', v); stage.hidden = false;
+    restartStage(v);                                          // the vehicle drives / flies across (animations restarted)
+    showTripBanner(v);                                        // 「飛機起飛喇！…」 + English, on screen
     updateIndicator();
-    playTripSound(v);
+    playTripSound(v);                                         // its sound effect (waits for iOS audio to resume)
     announce(zh(TRIP_ZH[v] + '（第 ' + state.rounds + ' 次，一共 ' + ROUNDS_TO_END + ' 次）') + ' ' + en(TRIP_EN[v] + ' Ride ' + state.rounds + ' of ' + ROUNDS_TO_END + '.'));
     tripTimers.push(setTimeout(endTrip, TRIP_MS[v]));
   }
   function endTrip() {
     if (state.screen !== 'trip') return;
-    stage.hidden = true; stage.removeAttribute('data-v');
+    stage.hidden = true; stage.removeAttribute('data-v'); hideTripBanner();
     state.target = null; state.choices = null;
     if (allMentioned()) goToGoodbye(); else goToCover({ after: true });
   }
@@ -2327,7 +2409,7 @@
     var b = BLOCKED[kind] || BLOCKED.denied, bk = BLOCKED[kind] ? kind : 'denied';
     blockedZh.textContent = b[0]; blockedEn.textContent = b[1];
     retryBtn.hidden = !SR;
-    show(blocked); stage.hidden = true; document.body.classList.remove('tripping');
+    show(blocked); stage.hidden = true; hideTripBanner(); document.body.classList.remove('tripping');
     focusEl(blockedTitle);
     tripTimers.push(setTimeout(function () {
       if (state.screen === 'blocked') say(b[2] + BLOCKED_TAIL, { rate: 0.95, pitch: 1.1, clip: 'blocked' + bk.charAt(0).toUpperCase() + bk.slice(1) });
@@ -2342,7 +2424,7 @@
     ensureAudio(); unlockSpeech(); stopSpeaking();
     state.mode = 'voice'; hideTalk(); rec.granted = false; rec.langIdx = 0; rec.lang = LANGS[0];
     state.screen = 'start'; show(startScr); focusEl(startTitle);
-    startStatus.textContent = '等緊你允許咪高峰… Waiting for microphone permission…';
+    startStatus.innerHTML = '等緊你允許咪高峰…<span class="en" lang="en">Waiting for microphone permission…</span>';
     if (!srStart(true)) showBlocked('unsupported');
   });
 
@@ -2350,7 +2432,7 @@
   function goToGoodbye() {
     unlisten(); stopSpeaking(); clearTripTimers(); cancelAllHolds(); hideTalk();
     state.screen = 'goodbye'; state.vehicle = null;
-    show(goodbye); stage.hidden = true; document.body.classList.remove('tripping');
+    show(goodbye); stage.hidden = true; hideTripBanner(); document.body.classList.remove('tripping');
     focusEl(byeTitle);
     announce(zh('做得好好！拜拜！八架車都講晒。家長可以用右上角「再玩過」掣。') + ' ' + en('Well done! Bye bye! You named all eight. Parents: the Play again button is at the top right.'));
     var wellLen = playBye(0.3, 'wellDone');                   // 「做得好好！」

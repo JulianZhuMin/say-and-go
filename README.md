@@ -47,3 +47,11 @@ After a slow one-by-one bilingual intro (random order; each figure alone, highli
 Speech recognition is **Chinese-only** (zh-HK / yue-Hant-HK, then Mandarin zh-CN / zh-TW). Aliases: ferry accepts 「渡輪」 and 「船」; MTR accepts 「地鐵」 and 「火車」.
 
 Locked English display names (tiles / intro): airplane, train, Bus, Motorbike, Fire truck, Ferry, ambulance, taxi.
+
+## Trip sound, banner and bilingual screen (2026-10-05p-trip-bilingual)
+
+- **Question audio**: still the recorded HiuGaai clips (`phrase-want` + `name-*` + `phrase-or`). The microphone only runs after the question has finished (`quizArmed`, since 2026-10-05o), because on iPhone a running microphone suspends Web Audio and the recorded question played silently.
+- **Trip sound effect**: before the vehicle's sound starts, the game resumes the AudioContext and waits (max ~0.7 s) until it is really running (iPhone can leave it suspended just after the microphone stops); if it never reports running, it plays anyway.
+- **Trip banner**: during every trip the departure line is shown big at the top, Chinese with English below (e.g. 「的士嚟喇，嘟嘟，走喇！」 / "The taxi is here. Toot toot, off we go!"). VoiceOver hears it from the live region.
+- **Animation**: every trip restarts the stage animations (reflow + restart), so the 2nd, 3rd … trip moves like the first. With Reduce Motion on, the vehicle still drives / flies across (only the small decorative loops slow down).
+- **Bilingual screen**: every Chinese line on screen has its English directly below (status pill, title, hint, start status, goodbye, dialogs, help). Portrait shows the same rotate hint as the other games: 「打橫部機，會更好玩！」 / "Turn the phone sideways — it's more fun!"
