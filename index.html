@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Say &amp; Go 嗌到我就出發</title>
 <meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」、「消防車」、「渡輪」、「救傷車」或者「的士」，或者講個英文名，睇佢出發！ Say airplane, train, bus, Motorbike, Fire truck, Ferry, ambulance or taxi.">
-<meta name="app-version" content="2026-10-05k-intro-zh">
+<meta name="app-version" content="2026-10-05l-ferry-horn">
 <meta name="theme-color" content="#4dabf7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1572,7 +1572,7 @@
     cleanup(nodes, d);
   }
 
-  // FERRY: low diesel rumble + soft water wash + two friendly horn toots while it pauses mid-harbour, then chugs off.
+  // FERRY: low diesel rumble + soft water wash + ONE deep foghorn "嘟" (single blast, not a bus-like beep-beep).
   function soundFerry() {
     var d = TRIP_MS.ferry / 1000, t0 = ctx.currentTime + 0.03, nodes = [];
     var pan = ctx.createStereoPanner ? ctx.createStereoPanner() : ctx.createGain();
@@ -1589,11 +1589,18 @@
     var wg = ctx.createGain(); env(wg, t0, [[0.3, 0.12], [d - 0.2, 0.1], [d, 0.0001]]);
     var wn = noiseSrc(t0, d); wn.connect(wb); wb.connect(wg); wg.connect(pan);
     nodes.push(eg, el, eo, am, lfo, lg, wb, wg, wn);
-    [1.7, 2.05].forEach(function (th, i) {
-      var g = ctx.createGain(), len = i ? 0.35 : 0.22; env(g, t0 + th, [[0.02, 0.22], [len - 0.04, 0.18], [len, 0.0001]]);
-      var f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 900; f.connect(g); g.connect(master); nodes.push(g, f);
-      [220, 277].forEach(function (hz) { var o = ctx.createOscillator(); o.type = 'square'; o.frequency.value = hz; o.connect(f); o.start(t0 + th); o.stop(t0 + th + len + 0.05); nodes.push(o); });
-    });
+    // One low foghorn blast mid-harbour (~0.7 s), sine stack, heavily lowpassed — not square beep-beep.
+    (function () {
+      var th = 1.75, len = 0.72;
+      var g = ctx.createGain(); env(g, t0 + th, [[0.08, 0.32], [0.45, 0.28], [len, 0.0001]]);
+      var f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 420; f.Q.value = 0.8;
+      f.connect(g); g.connect(master); nodes.push(g, f);
+      [[110, 1], [165, 0.55], [220, 0.22]].forEach(function (h) {
+        var o = ctx.createOscillator(), hg = ctx.createGain();
+        o.type = 'sine'; o.frequency.value = h[0]; hg.gain.value = h[1];
+        o.connect(hg); hg.connect(f); o.start(t0 + th); o.stop(t0 + th + len + 0.08); nodes.push(o, hg);
+      });
+    })();
     cleanup(nodes, d);
   }
   function playTripSound(v) {
