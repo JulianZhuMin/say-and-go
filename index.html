@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Say &amp; Go 嗌到我就出發</title>
 <meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」、「消防車」、「渡輪」、「救傷車」或者「的士」，或者講個英文名，睇佢出發！ Say airplane, train, bus, Motorbike, Fire truck, Ferry, ambulance or taxi.">
-<meta name="app-version" content="2026-10-05w-mic-hub-only">
+<meta name="app-version" content="2026-10-05x-skip-intro-replay">
 <meta name="theme-color" content="#4dabf7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -2347,10 +2347,11 @@
       if (state.mode === 'tap') { pickChoiceTrio(); say(TAP_PROMPT, { clip: 'tapPrompt' }); }
       else askRideChoice();
     };
-    var delay = opts.first || opts.reset ? 700 : 150;
+    // first start: name intro then quiz. play-again reset: skip intro, go straight to quiz (2026-10-05x).
+    var delay = opts.first ? 700 : (opts.reset ? 250 : 150);
     tripTimers.push(setTimeout(function () {
       if (state.screen !== 'cover') return;
-      if ((opts.first || opts.reset) && state.mode === 'voice') runNameIntro(startQuestion);
+      if (opts.first && state.mode === 'voice') runNameIntro(startQuestion);
       else startQuestion();
     }, delay));
     updateIndicator();
@@ -2497,7 +2498,7 @@
     }
     againDialog.close(true);
     goToCover({ reset: true });
-    announce(zh('再玩過！') + ' ' + en('Play again!'));
+    announce(zh('繼續玩！直接開始。') + ' ' + en('Keep playing! Starting now.'));
   }
 
   /* ---------- parent control: hold 1.5 s, or tap -> confirm dialog (copied from Tap Tap Music) ---------- */
