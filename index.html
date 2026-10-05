@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Say &amp; Go 講聲即郁</title>
 <meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」、「消防車」、「渡輪」、「救傷車」或者「的士」，或者講個英文名，睇佢出發！ Say airplane, train, bus, Motorbike, Fire truck, Ferry, ambulance or taxi.">
-<meta name="app-version" content="2026-10-05f-named-target">
+<meta name="app-version" content="2026-10-05g-one-sentence">
 <meta name="theme-color" content="#4dabf7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1065,23 +1065,30 @@
   var INTRO_GAP_MS = 1000;       // extra pause after each intro name (zh+en) before next vehicle
   var START_TIMEOUT_MS = 4000;    // a start() that never begins (iOS bug) is retried
   var RETRY_DELAYS = [300, 1000, 2000];
-  var PROMPT = '你想坐{zh}？';                 // per-round named target, e.g. 你想坐巴士？
-  var PROMPT_EN = 'Do you want the {en}?';      // English echo with the locked display name
-  var TRIO_GAP_MS = 400;          // short pause between the three choice names
+  var PROMPT = '你想坐{names}？';               // one Cantonese sentence listing the on-screen Chinese names
+  var PROMPT_EN = '';                         // question is Chinese-only (no English ask)
+  var TRIO_GAP_MS = 200;          // short pause between spoken name segments in the question
   var TAP_PROMPT = '撳一張圖，聽吓佢個名。';
-  var SAY_NAME = { plane: '飛機', mtr: '地鐵', bus: '巴士', moto: '電單車', fire: '消防車', ferry: '渡輪', ambulance: '救傷車', taxi: '的士' };
+  var SAY_NAME = { plane: '飛機', mtr: '地鐵', bus: '巴士', moto: '電單車', fire: '消防车', ferry: '渡輪', ambulance: '救傷車', taxi: '的士' };
   var SAY_EN = { plane: 'airplane', mtr: 'train', bus: 'Bus', moto: 'Motorbike', fire: 'Fire truck', ferry: 'Ferry', ambulance: 'ambulance', taxi: 'taxi' };
   var VEHICLES = ['plane', 'mtr', 'bus', 'moto', 'fire', 'ferry', 'ambulance', 'taxi'];
-  function askZh(v) { return PROMPT.replace('{zh}', SAY_NAME[v]); }
-  function askEn(v) { return PROMPT_EN.replace('{en}', SAY_EN[v]); }
+  // One sentence, L→R Chinese names: 3「你想坐A、B，定係C？」· 2「你想坐A，定係B？」· 1「你想坐A？」
+  function askQuestionZh(choices) {
+    var names = (choices || []).map(function (v) { return SAY_NAME[v]; }).filter(Boolean);
+    if (names.length <= 1) return '你想坐' + (names[0] || '') + '？';
+    if (names.length === 2) return '你想坐' + names[0] + '，定係' + names[1] + '？';
+    return '你想坐' + names[0] + '、' + names[1] + '，定係' + names[2] + '？';
+  }
+  function askZh(v) { return '你想坐' + SAY_NAME[v] + '？'; }   // legacy helper; quiz uses askQuestionZh
+  function askEn(v) { return 'Do you want the ' + SAY_EN[v] + '?'; }
   var TRIP_ZH = { plane: '飛機起飛喇！飛呀飛！', mtr: '地鐵嚟喇，開門喇，嘟嘀！', bus: '巴士嚟喇，叮叮，到站喇！', moto: '電單車嚟喇，轟轟轟！', fire: '消防車嚟喇，嘀嘟嘀嘟！', ferry: '渡輪嚟喇，嘟嘟，過海喇！', ambulance: '救傷車嚟喇，嘀嘟嘀嘟，救人喇！', taxi: '的士嚟喇，嘟嘟，走喇！' };
   var TRIP_EN = { plane: 'The plane takes off and swoops around the sky!', mtr: 'The train glides in, opens its doors with a do-di chime, and glides off!', bus: 'The double-decker bus pulls up at the bus stop, ding ding, toots its horn and drives off!', moto: 'The motorbike revs vroom vroom and zooms off down the road!', fire: 'The fire truck drives up with its siren going dee-daa dee-daa, stops, and drives off!', ferry: 'The green-and-white harbour ferry sails across the water, toots its horn, and chugs off!', ambulance: 'The white ambulance drives up with its siren, stops to help, and drives off!', taxi: 'The red Hong Kong taxi pulls up, toots its horn, and drives off!' };
 
   /* ===================== word matching (lenient, for ~3-year-olds) =====================
      The name can be ANYWHERE in what was heard ("搭咩呀，搭飛機呀", "我要坐巴士"); filler words are ignored.
-     Chinese or English names start a ride (the child can answer in either language). Every recognition alternative and
-     interim result is checked (confidence is ignored). Recognition: Cantonese first, then Mandarin (same Chinese names);
-     Apple's/Google's zh-HK dictation usually writes English words in Latin letters when the child code-switches.
+     Chinese names start a ride (the child answers in Chinese). Every recognition alternative and
+     interim result is checked (confidence is ignored). Recognition: Cantonese first, then Mandarin Chinese only
+     (zh-HK / yue-Hant-HK / zh-CN / zh-TW) — no English recognition pass. Latin aliases still match if dictation writes them.
      Strengths:
        3 = the real name      飛機 · 地鐵 地鐵車 地鐵站 火車 火車仔 · 巴士 巴士仔 雙層巴士   (MTR: only phrases containing 地鐵 or 火車; bus: only 巴士)
                               · 電單車 電單 摩托(車) 機車 鐵馬 · 消防車 救火車 滅火車 嘀嘟(車)
@@ -1112,7 +1119,7 @@
     ['bus', 3, '巴士', '巴士仔', '雙層巴士', '=bus', '=buses', '=doubledecker', '=doubledeckers'],        // 巴士, or English bus / double decker (no 巴巴 / 小巴 / 公車)
     ['moto', 3, '電單車', '電單', '摩托車', '摩托', '機車', '鐵馬', '=motorbike', '=motorbikes', '=motorcycle', '=motorcycles'],
     ['fire', 3, '消防車', '消防', '救火車', '救火', '滅火車', '嘀嘟車', '嘀嘟嘀嘟', '嘀嘟', '=firetruck', '=firetrucks', '=fireengine', '=fireengines'],
-    ['ferry', 3, '渡輪', '渡轮', '天星小輪', '天星渡輪', '=ferry', '=ferries', '=starferry', '=starferries'],
+    ['ferry', 3, '渡輪', '渡轮', '天星小輪', '天星渡輪', '船', '=ferry', '=ferries', '=starferry', '=starferries'],
     ['ambulance', 3, '救傷車', '救傷車', '救護車', '救护车', '救傷', '=ambulance', '=ambulances'],
     ['taxi', 3, '的士', '德士', '計程車', '出租车', '=taxi', '=taxis', '=cab', '=cabs'],
     ['plane', 2, '灰機', '非機', '肥機', '飛飛', '飛雞'],
@@ -1649,13 +1656,12 @@
   var CLIP_FILES = { home: 'home-byebye.mp3', bye: 'byebye-zh.mp3', tapPrompt: 'tap-prompt.mp3',
     plane: 'name-plane.mp3', mtr: 'name-mtr.mp3', bus: 'name-bus.mp3', moto: 'name-moto.mp3', fire: 'name-fire.mp3', ferry: 'name-ferry.mp3', ambulance: 'name-ambulance.mp3', taxi: 'name-taxi.mp3',
     'plane-en': 'name-plane-en.mp3', 'mtr-en': 'name-mtr-en.mp3', 'bus-en': 'name-bus-en.mp3', 'moto-en': 'name-moto-en.mp3', 'fire-en': 'name-fire-en.mp3', 'ferry-en': 'name-ferry-en.mp3', 'ambulance-en': 'name-ambulance-en.mp3', 'taxi-en': 'name-taxi-en.mp3',
-    // per-target question: ask-<v> = 「你想坐X？」, ask-<v>-en = "Do you want the X?"
-    'ask-plane': 'ask-plane.mp3', 'ask-mtr': 'ask-mtr.mp3', 'ask-bus': 'ask-bus.mp3', 'ask-moto': 'ask-moto.mp3', 'ask-fire': 'ask-fire.mp3', 'ask-ferry': 'ask-ferry.mp3', 'ask-ambulance': 'ask-ambulance.mp3', 'ask-taxi': 'ask-taxi.mp3',
-    'ask-plane-en': 'ask-plane-en.mp3', 'ask-mtr-en': 'ask-mtr-en.mp3', 'ask-bus-en': 'ask-bus-en.mp3', 'ask-moto-en': 'ask-moto-en.mp3', 'ask-fire-en': 'ask-fire-en.mp3', 'ask-ferry-en': 'ask-ferry-en.mp3', 'ask-ambulance-en': 'ask-ambulance-en.mp3', 'ask-taxi-en': 'ask-taxi-en.mp3',
+    // ask-* unused: quiz question is one TTS Cantonese sentence listing the three Chinese names
     blockedUnsupported: 'help-unsupported.mp3', blockedDenied: 'help-denied.mp3', blockedService: 'help-service.mp3', blockedNomic: 'help-nomic.mp3' };
   var APP_VERSION = (document.querySelector('meta[name="app-version"]') || {}).content || '';
   var BYE_CLIPS = { home: { say: '到屋企啦，拜拜！' }, bye: { say: '拜拜！' } };
   var clips = {}, byeVoice = { state: 'loading', clips: clips };
+  var clipsForceFailed = false;
   Object.keys(CLIP_FILES).forEach(function (k) { clips[k] = { data: null, buffer: null, state: 'loading' }; });
   function byeOverall() {
     var st = ['home', 'bye'].map(function (k) { return clips[k].state; });
@@ -1663,6 +1669,7 @@
   }
   function clipStates() { var o = {}; Object.keys(clips).forEach(function (k) { o[k] = clips[k].state; }); return o; }
   function decodeVoices() {
+    if (clipsForceFailed) return;
     if (!ctx) return;
     Object.keys(clips).forEach(function (k) {
       var c = clips[k];
@@ -1677,7 +1684,7 @@
     var c = clips[k];
     if (window.fetch && /^https?:$/.test(location.protocol)) {
       fetch(CLIP_FILES[k] + '?v=' + encodeURIComponent(APP_VERSION)).then(function (r) { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
-        .then(function (ab) { c.data = ab; c.state = 'fetched'; byeOverall(); decodeVoices(); })
+        .then(function (ab) { if (clipsForceFailed) { c.state = 'failed'; byeOverall(); return; } c.data = ab; c.state = 'fetched'; byeOverall(); decodeVoices(); })
         .catch(function () { c.state = 'failed'; byeOverall(); });
     } else { c.state = 'failed'; byeOverall(); }
   });
@@ -1783,12 +1790,17 @@
     if (/Edg\//.test(ua)) return 'zh-HK'; // Edge: Microsoft speech service, zh-HK = Cantonese
     return 'yue-Hant-HK';                 // Chrome / Android: Google's code for Cantonese (Traditional, Hong Kong)
   }
-  // Language fallback chain: Cantonese first (both browser codes), then Mandarin. No English pass.
+  // Language fallback chain: Chinese only — Cantonese first, then Mandarin (zh-CN / zh-TW). Never en-*.
   // (Recognisers can't be tuned for children's higher voices; the game copes through leniency instead:
   //  continuous listening, auto-restart, every alternative + interim result, confidence ignored, sloppy matching.)
   function langChain() {
     var first = pickLang(), out = [];
-    [first, first === 'zh-HK' ? 'yue-Hant-HK' : 'zh-HK', 'cmn-Hans-CN', 'zh-TW'].forEach(function (l) { if (out.indexOf(l) < 0) out.push(l); });
+    var cand = [first, first === 'zh-HK' ? 'yue-Hant-HK' : 'zh-HK', 'cmn-Hans-CN', 'zh-CN', 'zh-TW'];
+    cand.forEach(function (l) {
+      if (!l || /^en([-_]|$)/i.test(l)) return;
+      if (out.indexOf(l) < 0) out.push(l);
+    });
+    if (!out.length) out = ['zh-HK', 'yue-Hant-HK', 'cmn-Hans-CN', 'zh-CN', 'zh-TW'];
     return out;
   }
   var LANGS = langChain();
@@ -1900,25 +1912,25 @@
       rec.holdTimer = setTimeout(function () {
         if (rec.inst !== r || state.screen !== 'cover' || speaking) return;
         if (state.choices && state.choices.length) {
-          // Named target: only the vehicle the question asked about starts a trip.
-          if (state.quizArmed && b.v === state.target) { state.quizArmed = false; clearQuizTimer(); markMentioned(b.v); stats.matches.push(b); startTrip(b.v, t); }
-          else stats.ignored.push((state.choices.indexOf(b.v) >= 0 ? 'not-target:' : 'outside-trio:') + b.v);
+          // Free choice: any of the three on-screen vehicles starts its trip.
+          if (state.quizArmed && state.choices.indexOf(b.v) >= 0) { state.quizArmed = false; clearQuizTimer(); markMentioned(b.v); stats.matches.push(b); startTrip(b.v, t); }
+          else stats.ignored.push('outside-trio:' + b.v);
           return;
         }
         stats.matches.push(b); startTrip(b.v, t);
       }, HOLD_PREFIX_MS);
       return;
     }
-    // Named target: only the asked-about vehicle (its zh or en name) → child-mentioned + that vehicle trips.
-    // The other two figures are distractors; naming them (or anything else) is ignored and the 7s timeout advances.
+    // Free choice: any of the three on-screen vehicles (Chinese name / alias) → child-mentioned + that vehicle trips.
+    // Outside the three is ignored; ~7s silence/wrong advances with no teach-back.
     if (state.choices && state.choices.length) {
-      if (state.quizArmed && best.v === state.target) {
+      if (state.quizArmed && state.choices.indexOf(best.v) >= 0) {
         state.quizArmed = false; clearQuizTimer();
         markMentioned(best.v);
         stats.matches.push(best); startTrip(best.v, said);
         return;
       }
-      stats.ignored.push((state.choices.indexOf(best.v) >= 0 ? 'not-target:' : 'outside-trio:') + best.v);
+      stats.ignored.push('outside-trio:' + best.v);
       heard.textContent = said;
       return;
     }
@@ -2015,15 +2027,15 @@
   }
   function unmentioned() { return VEHICLES.filter(function (v) { return state.mentioned.indexOf(v) < 0; }); }
   function allMentioned() { return state.mentioned.length >= VEHICLES.length; }
-  // Trio: up to 3 random vehicles the child has NOT yet mentioned (if fewer remain, show all), plus ONE random target
-  // among them that the question names. choices[0] = left (choice-a), [1] = centre (choice-b), [2] = right (choice-c):
-  // the array order IS the on-screen left→right order, and the names are announced in that same order.
+  // Trio: up to 3 random vehicles the child has NOT yet mentioned (if fewer remain, show all).
+  // choices[0] = left (choice-a), [1] = centre (choice-b), [2] = right (choice-c):
+  // the array order IS the on-screen left→right order; the question lists those Chinese names in that order.
+  // Free choice: any of the three starts a trip (no single named target).
   function pickChoiceTrio() {
     var need = unmentioned();
     var n = Math.min(3, need.length);
     var choices = n ? shuffle(need).slice(0, n) : [];
-    var target = n ? choices[Math.floor(Math.random() * n)] : null;
-    state.target = target; state.choices = choices; state.quizArmed = false;
+    state.target = null; state.choices = choices; state.quizArmed = false;
     var list = tilesList();
     if (list) { list.classList.remove('intro-solo'); list.classList.add('choice-trio'); }
     setTrioPlay(n > 0);
@@ -2034,8 +2046,8 @@
       if (at < 0) li.classList.add('choice-hidden'); else li.classList.add(slots[at]);
     });
     clearIntroFocus();
-    stats.trios.push({ target: target, choices: choices.slice() });
-    return { target: target, choices: choices };
+    stats.trios.push({ target: null, choices: choices.slice() });
+    return { target: null, choices: choices };
   }
   // Teach-back: figure speaks ITS OWN zh then en (highlight must match). Tap path only — not silence/wrong.
   function teachName(v, done) {
@@ -2108,41 +2120,60 @@
       advanceAfterQuestion();
     }, QUIZ_MISS_MS);
   }
-  // Each round: show trio → announce each figure zh then en, left→right, with that figure lit →
-  // ask 「你想坐{target}？」 + "Do you want the {target}?" with the target lit → clear highlight → arm 7 s + listen.
+  // Each round: show trio → ONE Cantonese sentence listing the three Chinese names L→R
+  // (「你想坐A、B，定係C？」). As each name is spoken its figure highlights, then clears; after the
+  // question ends all three are neutral while listening. Free choice among the three; TTS (no ask-* clips).
   function askRideChoice() {
     if (state.screen !== 'cover') return;
     if (allMentioned()) { goToGoodbye(); return; }
     var trio = pickChoiceTrio();
     if (!trio.choices.length) { goToGoodbye(); return; }
-    var choices = trio.choices.slice(), target = trio.target, i = 0;
-    var alive = function () { return state.screen === 'cover' && state.choices && state.target === target && state.narrating; };
+    var choices = trio.choices.slice();
+    var sentence = askQuestionZh(choices);
+    var alive = function () { return state.screen === 'cover' && state.choices && state.narrating; };
     state.narrating = true;
-    announce(choices.map(function (v) { return zh(SAY_NAME[v]) + ' ' + en(SAY_EN[v]); }).join('，') + '。 ' + zh(askZh(target)) + ' ' + en(askEn(target)));
-    function nextName() {
+    announce(zh(sentence));
+    // Speak in segments so highlight can track each vehicle name, then clear when that name ends.
+    var parts = [{ text: '你想坐' }];
+    if (choices.length === 1) {
+      parts.push({ text: SAY_NAME[choices[0]], v: choices[0] });
+    } else if (choices.length === 2) {
+      parts.push({ text: SAY_NAME[choices[0]], v: choices[0] });
+      parts.push({ text: '，定係' });
+      parts.push({ text: SAY_NAME[choices[1]], v: choices[1] });
+    } else {
+      parts.push({ text: SAY_NAME[choices[0]], v: choices[0] });
+      parts.push({ text: '、' });
+      parts.push({ text: SAY_NAME[choices[1]], v: choices[1] });
+      parts.push({ text: '，定係' });
+      parts.push({ text: SAY_NAME[choices[2]], v: choices[2] });
+    }
+    parts.push({ text: '？' });
+    var i = 0;
+    function nextPart() {
       if (!alive()) return;
-      if (i >= choices.length) { ask(); return; }
-      var v = choices[i++];
-      sayFocused(v, SAY_NAME[v], { rate: 0.9, pitch: 1.25, clip: v }, 'trio', function () {
-        if (!alive()) return;
-        sayFocused(v, SAY_EN[v], { lang: 'en', rate: 0.9, pitch: 1.3, clip: v + '-en' }, 'trio', function () {
+      if (i >= parts.length) {
+        state.narrating = false; clearIntroFocus();
+        armQuizMissTimer();
+        listen(false);
+        return;
+      }
+      var p = parts[i++];
+      if (p.v) {
+        sayFocused(p.v, p.text, { rate: 0.9, pitch: 1.25 }, 'ask', function () {
           if (!alive()) return;
-          tripTimers.push(setTimeout(nextName, TRIO_GAP_MS));
+          clearIntroFocus();   // name finished → clear highlight before next segment
+          tripTimers.push(setTimeout(nextPart, TRIO_GAP_MS));
         });
-      });
-    }
-    function ask() {
-      sayFocused(target, askZh(target), { rate: 0.9, pitch: 1.25, clip: 'ask-' + target }, 'ask', function () {
-        if (!alive()) return;
-        sayFocused(target, askEn(target), { lang: 'en', rate: 0.95, pitch: 1.2, clip: 'ask-' + target + '-en' }, 'ask', function () {
+      } else {
+        clearIntroFocus();
+        say(p.text, { rate: 0.9, pitch: 1.25 }, function () {
           if (!alive()) return;
-          state.narrating = false; clearIntroFocus();
-          armQuizMissTimer();
-          listen(false);
+          nextPart();
         });
-      });
+      }
     }
-    nextName();
+    nextPart();
   }
   function goToCover(opts) {
     opts = opts || {};
@@ -2351,7 +2382,7 @@
 
   /* ---------- test / debug hook (read-only) ---------- */
   window.SayAndGo = {
-    APP_NAME: APP_NAME, TRIP_MS: TRIP_MS, ROUNDS_TO_END: ROUNDS_TO_END, HOLD_MS: HOLD_MS, QUIZ_MISS_MS: QUIZ_MISS_MS, INTRO_GAP_MS: INTRO_GAP_MS, PROMPT: PROMPT, PROMPT_EN: PROMPT_EN, askZh: askZh, askEn: askEn, CLIP_FILES: CLIP_FILES, WORDS: WORDS, LANGS: LANGS, SAY_NAME: SAY_NAME, SAY_EN: SAY_EN, VEHICLES: VEHICLES, shuffle: shuffle, pickChoiceTrio: pickChoiceTrio, teachName: teachName, markMentioned: markMentioned, clearMentioned: function () { state.mentioned = []; stats.mentioned = []; state.rounds = 0; state.target = null; state.choices = null; }, failClipsForTest: function () { Object.keys(clips).forEach(function (k) { clips[k].buffer = null; clips[k].data = null; clips[k].state = "failed"; }); }, askRideChoice: askRideChoice, runNameIntro: runNameIntro,
+    APP_NAME: APP_NAME, TRIP_MS: TRIP_MS, ROUNDS_TO_END: ROUNDS_TO_END, HOLD_MS: HOLD_MS, QUIZ_MISS_MS: QUIZ_MISS_MS, INTRO_GAP_MS: INTRO_GAP_MS, PROMPT: PROMPT, PROMPT_EN: PROMPT_EN, askZh: askZh, askEn: askEn, askQuestionZh: askQuestionZh, CLIP_FILES: CLIP_FILES, WORDS: WORDS, LANGS: LANGS, SAY_NAME: SAY_NAME, SAY_EN: SAY_EN, VEHICLES: VEHICLES, shuffle: shuffle, pickChoiceTrio: pickChoiceTrio, teachName: teachName, markMentioned: markMentioned, clearMentioned: function () { state.mentioned = []; stats.mentioned = []; state.rounds = 0; state.target = null; state.choices = null; }, failClipsForTest: function () { clipsForceFailed = true; Object.keys(clips).forEach(function (k) { clips[k].buffer = null; clips[k].data = null; clips[k].state = "failed"; }); }, askRideChoice: askRideChoice, runNameIntro: runNameIntro,
     match: matchVehicle, matchDetail: matchDetail, normalise: normalise, babyVariants: babyVariants,
     matchExact: function (t) { return matchExact(t).best; }, vowelMatch: function (t) { return vowelMatch(normalise(t), []); }, finalsOf: finalsOf, VOWEL_NAMES: VOWEL_NAMES, VOWEL_SKIP: VOWEL_SKIP,
     getState: function () {
