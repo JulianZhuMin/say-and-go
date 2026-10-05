@@ -14,7 +14,7 @@ Matching is lenient for toddlers: the name can be anywhere in what was heard ("�
 
 Vowel matching for toddler voices (second path, used only when no name was found): children's voices are high and their consonants are often unclear, so every character the recogniser wrote is turned into its Cantonese finals (the vowel + ending, tones ignored; characters with several readings try all of them). If consecutive characters have the same finals as a name, syllable by syllable, it counts even when the consonants differ or are missing: 飛機 fei-gei, 地鐵 dei-tit, 火車 fo-ce, 巴士 baa-si, 電單車 din-daan-ce, 消防車 siu-fong-ce (for the 3-syllable names the last two are enough: 番車, 黃車). So 記鐵 / 利鐵 → MTR, 媽士 / 吧士 → bus, 小防車 → fire truck, 美美 → plane, while 白士, 爸爸, 巴巴, 小巴, 公車, 港鐵 and 東鐵 still do nothing. More matching syllables win, then more real characters. Family words (爸爸, 媽媽, 哥哥, 姐姐 …), 多謝, 坐車 and 俾 / 畀 are never used for vowel matching. The character → final table covers common Traditional and Simplified characters and was generated from [rime-cantonese](https://github.com/rime/rime-cantonese) (CC BY 4.0).
 
-All the game's spoken lines are pre-recorded in one Hong Kong Cantonese child-friendly voice (the question, the eight names, the help messages and the goodbye: 「到屋企啦，bye bye！」 then 「Bye bye！」). The phone's own speech voice is only used if a clip can't load. While the game is listening, a big see-through toy microphone glows on the screen. After three rides the game says goodbye.
+All the game's spoken lines are pre-recorded (Hong Kong Cantonese child-friendly voice for Chinese, en-US voice for English: the per-vehicle questions, the eight names, the help messages and the goodbye: 「到屋企啦，bye bye！」 then 「Bye bye！」). The phone's own speech voice is only used if a clip can't load. While the game is listening, a big see-through toy microphone glows on the screen. After the child has named all eight vehicles the game says goodbye.
 
 - Tap **開始 Start**, then allow the microphone.
 - iPhone/iPad: use Safari, and turn on Siri and Dictation (Settings → General → Keyboard → Enable Dictation).
@@ -26,6 +26,17 @@ All the game's spoken lines are pre-recorded in one Hong Kong Cantonese child-fr
 Plain HTML, CSS and JavaScript. No install, no build step.
 
 
-## Free choice among three (2026-10-05e)
+## Named target among three (2026-10-05f)
 
-After a slower one-by-one bilingual intro (random order; each figure alone says Cantonese then English; ~1 s pause between vehicles; **no questions during intro**), each round shows up to three random vehicles the child has **not yet mentioned**. The game asks 「你想坐邊個？」 / “Which one do you want to ride?” — there is **no single hidden target**. Saying the Chinese or English name of **any** of the three starts that vehicle’s trip and marks it mentioned-by-child. Already-mentioned vehicles are excluded from later trios. Tap a figure: it says zh+en only (no trip; does not count as mentioned). Silence or speech matching none of the three: after 7s, next round with no teach-back. Game ends when the child has spoken all eight names themselves.
+After a slow one-by-one bilingual intro (random order; each figure alone, highlighted, says Cantonese then English; ~1 s pause between vehicles; **no questions during intro**), each round:
+
+1. Shows up to three random vehicles the child has **not yet named** in one row. `choices[0]` is the **left** card, `choices[1]` the **centre**, `choices[2]` the **right** (the array order *is* the on-screen order).
+2. Announces each of the three, left → right: Chinese name then English name, with **that** card highlighted (the others dim).
+3. Picks one of the three at random as the **target** and asks 「你想坐{中文名}？」 then “Do you want the {English name}?” (e.g. 「你想坐巴士？」 / “Do you want the Bus?”), with the target card highlighted. Highlight clears and the game starts listening; the 7 s window starts now.
+4. Only the target's Chinese or English name starts its trip and counts as named-by-child. The other two cards are distractors (naming them is ignored).
+5. Tap a card during the 7 s: it says its zh + en name (highlighted), no trip, does not count; the 7 s restart. Silence / wrong answer: after 7 s the next round starts (no teach-back).
+6. Named vehicles never appear in later trios. The game ends when the child has named all eight.
+
+Every spoken vehicle name (intro, trio announcements, the name in the question, tap teach-back) is spoken while that vehicle's own card is highlighted. Taps while the game is still talking are ignored, so they can't interrupt the sequence.
+
+Locked English display names: airplane, train, Bus, Motorbike, Fire truck, Ferry, ambulance, taxi. Question clips: `ask-<id>.mp3` (「你想坐X？」, zh-HK HiuGaai) and `ask-<id>-en.mp3` (“Do you want the X?”, en-US Ana).
