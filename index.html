@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Say &amp; Go 嗌到我就出發</title>
 <meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」、「消防車」、「渡輪」、「救傷車」或者「的士」，或者講個英文名，睇佢出發！ Say airplane, train, bus, Motorbike, Fire truck, Ferry, ambulance or taxi.">
-<meta name="app-version" content="2026-10-05n-well-done-bye">
+<meta name="app-version" content="2026-10-05o-ask-audio">
 <meta name="theme-color" content="#4dabf7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1759,30 +1759,61 @@
       })();
       return;
     }
-    if (clip && clip.buffer && ensureAudio() && master && ctx.state !== 'closed') {   // pre-recorded voice (queued if iOS is still resuming audio)
+    function speakTts() {
+      if (opts.clip) stats.clipsFallback.push(opts.clip);
+      if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) { fin(); return; }
       try {
+        if (!ttsVoice) pickVoice();
+        if (!ttsVoiceEn) pickVoiceEn();
+        var u = new SpeechSynthesisUtterance(text);
+        var isEn = opts.lang === 'en';
+        u.lang = isEn ? (ttsVoiceEn ? String(ttsVoiceEn.lang).replace('_', '-') : 'en-US') : 'zh-HK';
+        if (isEn) { if (ttsVoiceEn) u.voice = ttsVoiceEn; } else if (ttsVoice) u.voice = ttsVoice;
+        u.rate = opts.rate || (isEn ? 0.9 : 0.95); u.pitch = opts.pitch || (isEn ? 1.3 : 1.2); u.volume = 1;
+        u.onend = fin; u.onerror = fin;
+        speaking = true; updateIndicator();
+        speechSynthesis.speak(u);
+        sayTimer = setTimeout(fin, 2500 + text.length * 320);   // safety net if onend never fires
+      } catch (e) { fin(); }
+    }
+    function playBuf() {
+      if (gen !== sayGen) return;
+      if (!(clip && clip.buffer && master && ctx && ctx.state !== 'closed')) { speakTts(); return; }
+      try {
+        // iOS: AudioContext may be suspended/interrupted after the mic ran — resume then play, else TTS.
+        if (ctx.state !== 'running') {
+          speaking = true; updateIndicator();
+          var go = function () {
+            if (gen !== sayGen) return;
+            if (!ctx || ctx.state === 'closed') { speakTts(); return; }
+            if (ctx.state !== 'running') { speakTts(); return; }
+            try {
+              var src2 = ctx.createBufferSource(), g2 = ctx.createGain(); src2.buffer = clip.buffer; g2.gain.value = 1.15;
+              src2.connect(g2); g2.connect(master); src2.start(ctx.currentTime + 0.02); saySrc = src2;
+              speaking = true; updateIndicator(); stats.clipsPlayed.push(opts.clip);
+              sayTimer = setTimeout(fin, clip.buffer.duration * 1000 + 120);
+            } catch (e2) { speakTts(); }
+          };
+          var pr = null;
+          try { if (ctx.resume) pr = ctx.resume(); } catch (e3) { /* ignore */ }
+          if (pr && pr.then) {
+            var doneResume = false;
+            pr.then(function () { doneResume = true; go(); }, function () { doneResume = true; go(); });
+            sayTimer = setTimeout(function () { if (!doneResume && gen === sayGen) go(); }, 500);
+          } else go();
+          return;
+        }
         var src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = clip.buffer; g.gain.value = 1.15;
         src.connect(g); g.connect(master); src.start(ctx.currentTime + 0.02); saySrc = src;
         speaking = true; updateIndicator(); stats.clipsPlayed.push(opts.clip);
         sayTimer = setTimeout(fin, clip.buffer.duration * 1000 + 120);
-        return;
-      } catch (e) { /* fall through to speech synthesis */ }
+      } catch (e) { speakTts(); }
     }
-    if (opts.clip) stats.clipsFallback.push(opts.clip);
-    if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) { fin(); return; }
-    try {
-      if (!ttsVoice) pickVoice();
-      if (!ttsVoiceEn) pickVoiceEn();
-      var u = new SpeechSynthesisUtterance(text);
-      var isEn = opts.lang === 'en';
-      u.lang = isEn ? (ttsVoiceEn ? String(ttsVoiceEn.lang).replace('_', '-') : 'en-US') : 'zh-HK';
-      if (isEn) { if (ttsVoiceEn) u.voice = ttsVoiceEn; } else if (ttsVoice) u.voice = ttsVoice;
-      u.rate = opts.rate || (isEn ? 0.9 : 0.95); u.pitch = opts.pitch || (isEn ? 1.3 : 1.2); u.volume = 1;
-      u.onend = fin; u.onerror = fin;
-      speaking = true; updateIndicator();
-      speechSynthesis.speak(u);
-      sayTimer = setTimeout(fin, 2500 + text.length * 320);   // safety net if onend never fires
-    } catch (e) { fin(); }
+    if (clip && clip.buffer && ensureAudio() && master && ctx && ctx.state !== 'closed') {
+      playBuf();
+      return;
+    }
+    speakTts();
   }
   function unlockSpeech() {   // iOS only speaks after a first speak() inside a tap
     try { if (window.speechSynthesis && window.SpeechSynthesisUtterance) { var u = new SpeechSynthesisUtterance(' '); u.volume = 0; u.lang = 'zh-HK'; speechSynthesis.speak(u); } } catch (e) { /* ignore */ }
@@ -1841,7 +1872,7 @@
     if (r) { r.onstart = r.onaudiostart = r.onresult = r.onerror = r.onend = null; try { r.abort(); } catch (e) { try { r.stop(); } catch (e2) { /* ignore */ } } }
     updateBigMic();
   }
-  function canListen() { return SR && state.screen === 'cover' && state.mode === 'voice' && !speaking && !state.needTap && document.visibilityState !== 'hidden'; }
+  function canListen() { return SR && state.screen === 'cover' && state.mode === 'voice' && !speaking && !state.narrating && !!state.quizArmed && !state.needTap && document.visibilityState !== 'hidden'; }
   function listen(gesture) {
     if (!canListen()) { updateIndicator(); return; }
     rec.wanted = true;
@@ -1952,7 +1983,7 @@
   var micErr = false;
   function updateBigMic() {
     var on = !!rec.inst && rec.gotStart && !micErr && !rec.network && state.screen === 'cover' && state.mode === 'voice' &&
-             !speaking && !state.needTap && !cover.hidden && document.visibilityState !== 'hidden';
+             !speaking && !state.narrating && !!state.quizArmed && !state.needTap && !cover.hidden && document.visibilityState !== 'hidden';
     if (micBig.hidden === on) micBig.hidden = !on;
   }
   function updateIndicator() {
@@ -2098,10 +2129,11 @@
   }
   // Opening: ONE vehicle visible at a time, random order; Chinese name only (no English speech).
   function runNameIntro(done) {
+    unlisten(); stopSpeaking();
     var order = shuffle(VEHICLES);
     state.introOrder = order.slice(); stats.introOrder = order.slice(); stats.introSteps = [];
     var i = 0, list = tilesList();
-    setTrioPlay(false); state.narrating = true;
+    setTrioPlay(false); state.narrating = true; state.quizArmed = false;
     if (list) { list.classList.remove('choice-trio'); list.classList.add('intro-solo'); }
     function next() {
       if (state.screen !== 'cover') { state.narrating = false; showAllTilesBoard(); return; }
@@ -2145,12 +2177,13 @@
   function askRideChoice() {
     if (state.screen !== 'cover') return;
     if (allMentioned()) { goToGoodbye(); return; }
+    unlisten(); stopSpeaking(); ensureAudio();
     var trio = pickChoiceTrio();
     if (!trio.choices.length) { goToGoodbye(); return; }
     var choices = trio.choices.slice();
     var sentence = askQuestionZh(choices);
     var alive = function () { return state.screen === 'cover' && state.choices && state.narrating; };
-    state.narrating = true;
+    state.narrating = true; state.quizArmed = false;
     announce(zh(sentence));
     // Speak in segments so highlight can track each vehicle name, then clear when that name ends.
     var parts = [{ text: '你想坐', clip: 'wantRide' }];
