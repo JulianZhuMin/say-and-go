@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Say &amp; Go 嗌到我就出發</title>
 <meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」、「消防車」、「渡輪」、「救傷車」或者「的士」，或者講個英文名，睇佢出發！ Say airplane, train, bus, Motorbike, Fire truck, Ferry, ambulance or taxi.">
-<meta name="app-version" content="2026-10-05j-last-one-pad">
+<meta name="app-version" content="2026-10-05k-intro-zh">
 <meta name="theme-color" content="#4dabf7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1062,7 +1062,7 @@
   var HOLD_PREFIX_MS = 700;       // wait for the rest of an unfinished word that could mean another vehicle
   var IDLE_MS = 90000;            // stop listening after 90 s of nothing, show the Talk button
   var QUIZ_MISS_MS = 7000;       // 7 s after question asked
-  var INTRO_GAP_MS = 1000;       // extra pause after each intro name (zh+en) before next vehicle
+  var INTRO_GAP_MS = 1000;       // extra pause after each intro Chinese name before next vehicle
   var START_TIMEOUT_MS = 4000;    // a start() that never begins (iOS bug) is retried
   var RETRY_DELAYS = [300, 1000, 2000];
   var PROMPT = '你想坐{names}？';               // one Cantonese sentence listing the on-screen Chinese names
@@ -2088,7 +2088,7 @@
     if (allMentioned()) goToGoodbye();
     else goToCover({ after: true });
   }
-  // Opening: ONE vehicle visible at a time, random order; same id for art + zh + en.
+  // Opening: ONE vehicle visible at a time, random order; Chinese name only (no English speech).
   function runNameIntro(done) {
     var order = shuffle(VEHICLES);
     state.introOrder = order.slice(); stats.introOrder = order.slice(); stats.introSteps = [];
@@ -2109,16 +2109,13 @@
       if (!focused || focused.getAttribute('data-v') !== v) { showAllTilesBoard(); return; }
       stats.introSteps.push({ v: v, zh: SAY_NAME[v], en: SAY_EN[v] });
       stats.spokenNames.push({ phase: 'intro', v: v, text: SAY_NAME[v], lit: focused.getAttribute('data-v') });
-      announce(zh(SAY_NAME[v]) + ' ' + en(SAY_EN[v]));
-      // Slower intro pacing; no question prompts during intro — only names.
+      announce(zh(SAY_NAME[v]));
+      // Slower intro pacing; Chinese name only — no English, no question prompts.
       say(SAY_NAME[v], { rate: 0.85, pitch: 1.25, clip: v }, function () {
         if (state.screen !== 'cover') { showAllTilesBoard(); return; }
         var still = document.querySelector('.tile.intro-focus');
         if (!still || still.getAttribute('data-v') !== v) { showAllTilesBoard(); return; }
-        stats.spokenNames.push({ phase: 'intro', v: v, text: SAY_EN[v], lit: still.getAttribute('data-v') });
-        say(SAY_EN[v], { lang: 'en', rate: 0.85, pitch: 1.3, clip: v + '-en' }, function () {
-          tripTimers.push(setTimeout(next, INTRO_GAP_MS));
-        });
+        tripTimers.push(setTimeout(next, INTRO_GAP_MS));
       });
     }
     next();
