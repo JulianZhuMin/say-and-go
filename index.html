@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Say &amp; Go 講聲即郁</title>
-<meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」或者「消防車」，睇佢出發！ Say the Cantonese name of the plane, MTR, bus, motorbike or fire truck and watch it go. A voice game for toddlers.">
-<meta name="app-version" content="2026-10-04c-vowel-match">
+<meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」或者「消防车」，或者講個英文名，睇佢出發！ Say the Cantonese or English name of the plane, MTR, bus, motorbike or fire truck and watch it go. A voice game for toddlers.">
+<meta name="app-version" content="2026-10-05a-en-names">
 <meta name="theme-color" content="#4dabf7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -900,11 +900,16 @@
 
   /* ===================== word matching (lenient, for ~3-year-olds) =====================
      The name can be ANYWHERE in what was heard ("搭咩呀，搭飛機呀", "我要坐巴士"); filler words are ignored.
-     Only the Chinese names count (no English words). Every recognition alternative and interim result is checked
-     (confidence is ignored). Recognition: Cantonese first, then Mandarin (same Chinese names).
+     Chinese or English names start a ride (the child can answer in either language). Every recognition alternative and
+     interim result is checked (confidence is ignored). Recognition: Cantonese first, then Mandarin (same Chinese names);
+     Apple's/Google's zh-HK dictation usually writes English words in Latin letters when the child code-switches.
      Strengths:
        3 = the real name      飛機 · 地鐵 地鐵車 地鐵站 火車 火車仔 · 巴士 巴士仔 雙層巴士   (MTR: only phrases containing 地鐵 or 火車; bus: only 巴士)
                               · 電單車 電單 摩托(車) 機車 鐵馬 · 消防車 救火車 滅火車 嘀嘟(車)
+                              · English (whole Latin word, case-insensitive; spaces ignored so "fire truck" = firetruck,
+                                "M T R" = mtr): plane / aeroplane / airplane · MTR / train / subway / metro · bus /
+                                double decker · motorbike / motorcycle / motor bike · fire truck / fire engine / firetruck
+                                (plurals too). "business", "trainer" never count (the match needs a word boundary).
        2 = sloppy / homophone 灰機 非機 肥機 飛飛 飛雞 · 單車 丹車 電車 電電 摩多
                               嘟嘟車 轟轟 · 消消 宵防 蕭防 滴嘟
            + a cheap "sounds-like" match: each character is mapped to a small Jyutping/pinyin sound group, so e.g.
@@ -917,14 +922,16 @@
      A few everyday words (手機, 司機, 相機, 打火機, 火柴 ...) are blocked; 救火車 is the fire truck, 火車 the MTR. 巴 on its own (嘴巴, 尾巴) never counts.
      The best match wins (strength, then length, then earliest). No match: nothing happens, the game keeps listening. */
   var WORDS = [
-    // [vehicle, strength, words...]   (vehicle null = blocked everyday word). Chinese names only: the child says the
-    // Cantonese name (Mandarin recognition of the same Chinese names also works); English words never start a ride.
+    // [vehicle, strength, words...]   (vehicle null = blocked everyday word). '=' = whole Latin word (word boundary on
+    // both sides after spaces are stripped), so "bus" matches "I want bus" / "Bus!" but never "business" or "busy".
+    // Chinese: Cantonese or Mandarin of the same characters. English: Latin letters from code-switched speech.
+    // No English on the vowel-matching path (Latin letters have no Cantonese finals).
     [null, 4, '手機', '司機', '相機', '機器', '電視機', '洗衣機', '打火機', '收音機', '遊戲機', '冷氣機', '計數機', '火柴', '嘴巴', '尾巴', '下巴'],
-    ['plane', 3, '飛機'],
-    ['mtr', 3, '地鐵', '地鐵車', '地鐵站', '火車', '火車仔'],   // the MTR starts ONLY when 地鐵 or 火車 is said (no 港鐵 / 東鐵 / 地地 / 地車, no sound-alikes)
-    ['bus', 3, '巴士', '巴士仔', '雙層巴士'],        // the bus starts ONLY when 巴士 is said (no 巴巴 / 小巴 / 公車, no sound-alikes)
-    ['moto', 3, '電單車', '電單', '摩托車', '摩托', '機車', '鐵馬'],
-    ['fire', 3, '消防車', '消防', '救火車', '救火', '滅火車', '嘀嘟車', '嘀嘟嘀嘟', '嘀嘟'],
+    ['plane', 3, '飛機', '=plane', '=planes', '=aeroplane', '=aeroplanes', '=airplane', '=airplanes'],
+    ['mtr', 3, '地鐵', '地鐵車', '地鐵站', '火車', '火車仔', '=mtr', '=train', '=trains', '=subway', '=subways', '=metro', '=metros'],   // 地鐵 / 火車, or English MTR / train / subway / metro (no 港鐵 / 東鐵 / 地地 / 地車)
+    ['bus', 3, '巴士', '巴士仔', '雙層巴士', '=bus', '=buses', '=doubledecker', '=doubledeckers'],        // 巴士, or English bus / double decker (no 巴巴 / 小巴 / 公車)
+    ['moto', 3, '電單車', '電單', '摩托車', '摩托', '機車', '鐵馬', '=motorbike', '=motorbikes', '=motorcycle', '=motorcycles'],
+    ['fire', 3, '消防車', '消防', '救火車', '救火', '滅火車', '嘀嘟車', '嘀嘟嘀嘟', '嘀嘟', '=firetruck', '=firetrucks', '=fireengine', '=fireengines'],
     ['plane', 2, '灰機', '非機', '肥機', '飛飛', '飛雞'],
     ['moto', 2, '單單車', '單車', '丹車', '電車', '電電', '摩多', '嘟嘟車', '轟轟'],
     ['fire', 2, '消消車', '消消', '宵防', '蕭防', '消房', '滴嘟', '嘀嘀嘟'],
