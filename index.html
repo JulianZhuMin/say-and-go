@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Say &amp; Go 講聲即郁</title>
 <meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」、「消防車」、「渡輪」、「救傷車」或者「的士」，或者講個英文名，睇佢出發！ Say airplane, train, bus, Motorbike, Fire truck, Ferry, ambulance or taxi.">
-<meta name="app-version" content="2026-10-05d-eight-quiz">
+<meta name="app-version" content="2026-10-05e-free-choice">
 <meta name="theme-color" content="#4dabf7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1049,9 +1049,11 @@
   var HOLD_PREFIX_MS = 700;       // wait for the rest of an unfinished word that could mean another vehicle
   var IDLE_MS = 90000;            // stop listening after 90 s of nothing, show the Talk button
   var QUIZ_MISS_MS = 7000;       // 7 s after question asked
+  var INTRO_GAP_MS = 1000;       // extra pause after each intro name (zh+en) before next vehicle
   var START_TIMEOUT_MS = 4000;    // a start() that never begins (iOS bug) is retried
   var RETRY_DELAYS = [300, 1000, 2000];
-  var PROMPT = '你想坐飛機、地鐵、巴士、電單車、消防車、渡輪、救傷車，定係的士呀？';
+  var PROMPT = '你想坐邊個？';
+  var PROMPT_EN = 'Which one do you want to ride?';
   var TAP_PROMPT = '撳一張圖，聽吓佢個名。';
   var SAY_NAME = { plane: '飛機', mtr: '地鐵', bus: '巴士', moto: '電單車', fire: '消防車', ferry: '渡輪', ambulance: '救傷車', taxi: '的士' };
   var SAY_EN = { plane: 'airplane', mtr: 'train', bus: 'Bus', moto: 'Motorbike', fire: 'Fire truck', ferry: 'Ferry', ambulance: 'ambulance', taxi: 'taxi' };
@@ -1628,7 +1630,7 @@
      (home-byebye.mp3 = 「到屋企啦，bye bye！」, byebye-zh.mp3 = 「Bye bye！」). Fetched at load, decoded into the Web Audio
      context that the Start tap creates (so iOS lets them play). speechSynthesis is only a fallback if a clip can't load.
      (byebye.wav, the old Piper child voice, is kept in the folder but no longer used.) */
-  var CLIP_FILES = { home: 'home-byebye.mp3', bye: 'byebye-zh.mp3', prompt: 'prompt.mp3', tapPrompt: 'tap-prompt.mp3',
+  var CLIP_FILES = { home: 'home-byebye.mp3', bye: 'byebye-zh.mp3', prompt: 'prompt.mp3', promptEn: 'prompt-en.mp3', tapPrompt: 'tap-prompt.mp3',
     plane: 'name-plane.mp3', mtr: 'name-mtr.mp3', bus: 'name-bus.mp3', moto: 'name-moto.mp3', fire: 'name-fire.mp3', ferry: 'name-ferry.mp3', ambulance: 'name-ambulance.mp3', taxi: 'name-taxi.mp3',
     'plane-en': 'name-plane-en.mp3', 'mtr-en': 'name-mtr-en.mp3', 'bus-en': 'name-bus-en.mp3', 'moto-en': 'name-moto-en.mp3', 'fire-en': 'name-fire-en.mp3', 'ferry-en': 'name-ferry-en.mp3', 'ambulance-en': 'name-ambulance-en.mp3', 'taxi-en': 'name-taxi-en.mp3',
     blockedUnsupported: 'help-unsupported.mp3', blockedDenied: 'help-denied.mp3', blockedService: 'help-service.mp3', blockedNomic: 'help-nomic.mp3' };
@@ -1878,9 +1880,9 @@
       var r = rec.inst, b = best, t = said;
       rec.holdTimer = setTimeout(function () {
         if (rec.inst !== r || state.screen !== 'cover' || speaking) return;
-        if (state.choices && state.target) {
-          if (b.v === state.target) { state.quizArmed = false; clearQuizTimer(); markMentioned(b.v); stats.matches.push(b); startTrip(b.v, t); }
-          else if (state.choices.indexOf(b.v) >= 0) { markMentioned(b.v); stats.ignored.push('distractor-mentioned:' + b.v); }
+        if (state.choices && state.choices.length) {
+          // Free choice: naming ANY of the three starts that vehicle's trip.
+          if (state.choices.indexOf(b.v) >= 0) { state.quizArmed = false; clearQuizTimer(); markMentioned(b.v); stats.matches.push(b); startTrip(b.v, t); }
           else stats.ignored.push('outside-trio:' + b.v);
           return;
         }
@@ -1888,22 +1890,14 @@
       }, HOLD_PREFIX_MS);
       return;
     }
-    // Quiz voice rules:
-    //  - naming the TARGET → child-mentioned + trip
-    //  - naming a DISTRACTOR among the three → child-mentioned that vehicle, no trip, keep listening in the 7s window
-    //  - naming something outside the three → ignore (7s silence-style timeout still advances with no teach-back)
-    if (state.choices && state.target) {
-      if (best.v === state.target) {
+    // Free-choice among the three: naming ANY of the three (zh or en) → child-mentioned + that vehicle trips.
+    // Naming something outside the three → ignore (7s silence-style timeout still advances with no teach-back).
+    if (state.choices && state.choices.length) {
+      if (state.choices.indexOf(best.v) >= 0) {
         state.quizArmed = false; clearQuizTimer();
         markMentioned(best.v);
         stats.matches.push(best); startTrip(best.v, said);
         return;
-      }
-      if (state.choices.indexOf(best.v) >= 0) {
-        markMentioned(best.v);   // distractor named by child — counts toward completion, no trip
-        stats.ignored.push('distractor-mentioned:' + best.v);
-        heard.textContent = said;
-        return;                  // keep listening until correct / tap / 7s
       }
       stats.ignored.push('outside-trio:' + best.v);
       heard.textContent = said;
@@ -1981,18 +1975,13 @@
   }
   function unmentioned() { return VEHICLES.filter(function (v) { return state.mentioned.indexOf(v) < 0; }); }
   function allMentioned() { return state.mentioned.length >= VEHICLES.length; }
-  // Quiz trio: prefer unmentioned target; exclude already-mentioned from choices when enough remain.
+  // Free-choice trio: up to 3 random vehicles the child has NOT yet mentioned (if fewer remain, show all).
+  // No single hidden target — any of the three names starts that vehicle's trip.
   function pickChoiceTrio() {
     var need = unmentioned();
-    var pool = need.length ? need : VEHICLES.slice();
-    var target = shuffle(pool)[0];
-    var restPool = VEHICLES.filter(function (v) { return v !== target; });
-    // Prefer distractors that are also unmentioned, then fill from the rest.
-    var pref = shuffle(restPool.filter(function (v) { return state.mentioned.indexOf(v) < 0; }));
-    var fill = shuffle(restPool.filter(function (v) { return state.mentioned.indexOf(v) >= 0; }));
-    var distractors = pref.concat(fill).slice(0, Math.min(2, restPool.length));
-    var choices = shuffle([target].concat(distractors));
-    state.target = target; state.choices = choices; state.quizArmed = false;
+    var n = Math.min(3, need.length);
+    var choices = n ? shuffle(need).slice(0, n) : [];
+    state.target = null; state.choices = choices; state.quizArmed = false;
     var list = tilesList();
     if (list) { list.classList.remove('intro-solo'); list.classList.add('choice-trio'); }
     var slots = ['choice-a', 'choice-b', 'choice-c'];
@@ -2002,8 +1991,8 @@
       if (at < 0) li.classList.add('choice-hidden'); else li.classList.add(slots[at]);
     });
     clearIntroFocus();
-    stats.trios.push({ target: target, choices: choices.slice() });
-    return { target: target, choices: choices };
+    stats.trios.push({ target: null, choices: choices.slice(), freeChoice: true });
+    return { target: null, choices: choices };
   }
   // Teach-back: figure speaks ITS OWN zh then en (highlight must match). Tap path only — not silence/wrong.
   function teachName(v, done) {
@@ -2051,12 +2040,13 @@
       if (!focused || focused.getAttribute('data-v') !== v) { showAllTilesBoard(); return; }
       stats.introSteps.push({ v: v, zh: SAY_NAME[v], en: SAY_EN[v] });
       announce(zh(SAY_NAME[v]) + ' ' + en(SAY_EN[v]));
-      say(SAY_NAME[v], { rate: 0.9, pitch: 1.25, clip: v }, function () {
+      // Slower intro pacing; no question prompts during intro — only names.
+      say(SAY_NAME[v], { rate: 0.85, pitch: 1.25, clip: v }, function () {
         if (state.screen !== 'cover') { showAllTilesBoard(); return; }
         var still = document.querySelector('.tile.intro-focus');
         if (!still || still.getAttribute('data-v') !== v) { showAllTilesBoard(); return; }
-        say(SAY_EN[v], { lang: 'en', rate: 0.9, pitch: 1.3, clip: v + '-en' }, function () {
-          tripTimers.push(setTimeout(next, 280));
+        say(SAY_EN[v], { lang: 'en', rate: 0.85, pitch: 1.3, clip: v + '-en' }, function () {
+          tripTimers.push(setTimeout(next, INTRO_GAP_MS));
         });
       });
     }
@@ -2072,15 +2062,20 @@
       advanceAfterQuestion();
     }, QUIZ_MISS_MS);
   }
-  function askTarget() {
+  function askRideChoice() {
     if (state.screen !== 'cover') return;
     if (allMentioned()) { goToGoodbye(); return; }
-    var trio = pickChoiceTrio(), v = trio.target;
-    announce(zh('邊個係' + SAY_NAME[v] + '呀？') + ' ' + en('Which one is the ' + SAY_EN[v] + '?'));
-    say(SAY_NAME[v], { rate: 0.9, pitch: 1.25, clip: v }, function () {
+    var trio = pickChoiceTrio();
+    if (!trio.choices.length) { goToGoodbye(); return; }
+    // Free choice: ask which they want to ride — NOT a single-target "which one is X".
+    announce(zh(PROMPT) + ' ' + en(PROMPT_EN));
+    say(PROMPT, { rate: 0.9, pitch: 1.25, clip: 'prompt' }, function () {
       if (state.screen !== 'cover') return;
-      armQuizMissTimer();
-      listen(false);
+      say(PROMPT_EN, { lang: 'en', rate: 0.95, pitch: 1.2, clip: 'promptEn' }, function () {
+        if (state.screen !== 'cover') return;
+        armQuizMissTimer();
+        listen(false);
+      });
     });
   }
   function goToCover(opts) {
@@ -2099,7 +2094,7 @@
     var startQuestion = function () {
       if (state.screen !== 'cover') return;
       if (state.mode === 'tap') { pickChoiceTrio(); say(TAP_PROMPT, { clip: 'tapPrompt' }); }
-      else askTarget();
+      else askRideChoice();
     };
     var delay = opts.first || opts.reset ? 700 : 150;
     tripTimers.push(setTimeout(function () {
@@ -2143,9 +2138,14 @@
       stats.tapsSpoken.push(v);
       if (state.choices && state.quizArmed) {
         if (state.choices.indexOf(v) < 0) return;
+        // Tap: figure says zh+en only (no trip, does not count as child-mentioned); then keep the 7s window.
         state.quizArmed = false; clearQuizTimer();
-        srAbort(); clearTripTimers(); unlisten(); stopSpeaking();
-        teachName(v, advanceAfterQuestion);
+        srAbort(); unlisten(); stopSpeaking();
+        teachName(v, function () {
+          if (state.screen !== 'cover' || !state.choices) return;
+          armQuizMissTimer();
+          if (state.mode === 'voice' && !state.needTap) listen(false);
+        });
         return;
       }
       var wasListening = state.mode === 'voice' && !state.needTap;
@@ -2282,7 +2282,7 @@
 
   /* ---------- test / debug hook (read-only) ---------- */
   window.SayAndGo = {
-    APP_NAME: APP_NAME, TRIP_MS: TRIP_MS, ROUNDS_TO_END: ROUNDS_TO_END, HOLD_MS: HOLD_MS, WORDS: WORDS, LANGS: LANGS, SAY_NAME: SAY_NAME, SAY_EN: SAY_EN, VEHICLES: VEHICLES, shuffle: shuffle, pickChoiceTrio: pickChoiceTrio, teachName: teachName, markMentioned: markMentioned,
+    APP_NAME: APP_NAME, TRIP_MS: TRIP_MS, ROUNDS_TO_END: ROUNDS_TO_END, HOLD_MS: HOLD_MS, QUIZ_MISS_MS: QUIZ_MISS_MS, INTRO_GAP_MS: INTRO_GAP_MS, PROMPT: PROMPT, PROMPT_EN: PROMPT_EN, WORDS: WORDS, LANGS: LANGS, SAY_NAME: SAY_NAME, SAY_EN: SAY_EN, VEHICLES: VEHICLES, shuffle: shuffle, pickChoiceTrio: pickChoiceTrio, teachName: teachName, markMentioned: markMentioned, clearMentioned: function () { state.mentioned = []; stats.mentioned = []; state.rounds = 0; state.target = null; state.choices = null; }, failClipsForTest: function () { Object.keys(clips).forEach(function (k) { clips[k].buffer = null; clips[k].data = null; clips[k].state = "failed"; }); }, askRideChoice: askRideChoice, runNameIntro: runNameIntro,
     match: matchVehicle, matchDetail: matchDetail, normalise: normalise, babyVariants: babyVariants,
     matchExact: function (t) { return matchExact(t).best; }, vowelMatch: function (t) { return vowelMatch(normalise(t), []); }, finalsOf: finalsOf, VOWEL_NAMES: VOWEL_NAMES, VOWEL_SKIP: VOWEL_SKIP,
     getState: function () {

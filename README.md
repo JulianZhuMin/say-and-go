@@ -26,6 +26,6 @@ All the game's spoken lines are pre-recorded in one Hong Kong Cantonese child-fr
 Plain HTML, CSS and JavaScript. No install, no build step.
 
 
-## Quiz mode (2026-10-05)
+## Free choice among three (2026-10-05e)
 
-After a one-by-one bilingual intro (random order; each figure alone says Cantonese then English), each question shows a random trio. The target is chosen from vehicles the child has not yet named. Correct spoken name of the target starts a trip and marks that vehicle mentioned-by-child. Naming a distractor among the three also marks it mentioned (no trip). Tap teaches that figure’s zh+en then next (tap does not mark mentioned). Silence or speech matching none of the three: after 7s, next with no teach-back. Game ends only when the child has spoken all eight names themselves.
+After a slower one-by-one bilingual intro (random order; each figure alone says Cantonese then English; ~1 s pause between vehicles; **no questions during intro**), each round shows up to three random vehicles the child has **not yet mentioned**. The game asks 「你想坐邊個？」 / “Which one do you want to ride?” — there is **no single hidden target**. Saying the Chinese or English name of **any** of the three starts that vehicle’s trip and marks it mentioned-by-child. Already-mentioned vehicles are excluded from later trios. Tap a figure: it says zh+en only (no trip; does not count as mentioned). Silence or speech matching none of the three: after 7s, next round with no teach-back. Game ends when the child has spoken all eight names themselves.
