@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Say &amp; Go 嗌到我就出發</title>
 <meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」、「消防車」、「渡輪」、「救傷車」或者「的士」，或者講個英文名，睇佢出發！ Say airplane, train, bus, Motorbike, Fire truck, Ferry, ambulance or taxi.">
-<meta name="app-version" content="2026-10-05p-trip-bilingual">
+<meta name="app-version" content="2026-10-05q-six-rounds">
 <meta name="theme-color" content="#4dabf7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1091,7 +1091,7 @@
 (function () {
   'use strict';
   /* ===================== settings ===================== */
-  var ROUNDS_TO_END = 8;          // game ends when child has named all 8 vehicles themselves
+  var ROUNDS_TO_END = 6;          // 6 successful rides (6 of 8 named) → goodbye; the last 2 are never asked
   var TRIP_MS = { plane: 3600, mtr: 4200, bus: 4200, moto: 3400, fire: 4000, ferry: 4400, ambulance: 4100, taxi: 3800 };
   var HOLD_MS = 1500;             // long-press for the parent "Play again" control
   var CLICK_DEDUPE_MS = 700;
@@ -1402,7 +1402,7 @@
   stage.querySelector('.mover-taxi .taxi-tilt').appendChild(artCopy('art-taxi'));
 
   /* ===================== state ===================== */
-  var state = { screen: 'start', mode: 'voice', rounds: 0, vehicle: null, blockedKind: null, needTap: false, target: null, choices: null, introOrder: null, mentioned: [], quizArmed: false, quizTimer: 0, narrating: false };
+  var state = { screen: 'start', mode: 'voice', rounds: 0, vehicle: null, blockedKind: null, needTap: false, target: null, choices: null, introOrder: null, mentioned: [], lastTrio: [], quizArmed: false, quizTimer: 0, narrating: false };
   var stats = { trips: [], tapsSpoken: [], sounds: [], voice: { bye: 0 }, voiceVia: [], clipsPlayed: [], clipsFallback: [], ignored: [], heard: [], matches: [], introOrder: [], introSteps: [], trios: [], teaches: [], mentioned: [], spokenNames: [] };
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition || null;
 
@@ -2009,28 +2009,30 @@
       rec.holdTimer = setTimeout(function () {
         if (rec.inst !== r || state.screen !== 'cover' || speaking) return;
         if (state.choices && state.choices.length) {
-          // Free choice: any of the three on-screen vehicles starts its trip.
-          if (state.quizArmed && state.choices.indexOf(b.v) >= 0) { state.quizArmed = false; clearQuizTimer(); markMentioned(b.v); stats.matches.push(b); startTrip(b.v, t); }
-          else stats.ignored.push('outside-trio:' + b.v);
+          // Free choice: only a NOT-yet-named on-screen vehicle starts its trip.
+          if (state.quizArmed && isTripAnswer(b.v)) { state.quizArmed = false; clearQuizTimer(); markMentioned(b.v); stats.matches.push(b); startTrip(b.v, t); }
+          else stats.ignored.push((state.choices.indexOf(b.v) >= 0 ? 'already-named:' : 'outside-trio:') + b.v);
           return;
         }
+        if (!isTripAnswer(b.v)) { stats.ignored.push('already-named:' + b.v); return; }
         stats.matches.push(b); startTrip(b.v, t);
       }, HOLD_PREFIX_MS);
       return;
     }
-    // Free choice: any of the three on-screen vehicles (Chinese name / alias) → child-mentioned + that vehicle trips.
-    // Outside the three is ignored; ~7s silence/wrong advances with no teach-back.
+    // Free choice: an on-screen vehicle the child has NOT named yet (Chinese name / alias) → child-mentioned + trips.
+    // Outside the three, or an already-named vehicle, is ignored (keep listening); ~7s silence/wrong advances.
     if (state.choices && state.choices.length) {
-      if (state.quizArmed && state.choices.indexOf(best.v) >= 0) {
+      if (state.quizArmed && isTripAnswer(best.v)) {
         state.quizArmed = false; clearQuizTimer();
         markMentioned(best.v);
         stats.matches.push(best); startTrip(best.v, said);
         return;
       }
-      stats.ignored.push('outside-trio:' + best.v);
+      stats.ignored.push((state.choices.indexOf(best.v) >= 0 ? 'already-named:' : 'outside-trio:') + best.v);
       heard.textContent = said;
       return;
     }
+    if (!isTripAnswer(best.v)) { stats.ignored.push('already-named:' + best.v); return; }
     stats.matches.push(best); startTrip(best.v, said);
   }
 
@@ -2131,27 +2133,31 @@
   }
   function unmentioned() { return VEHICLES.filter(function (v) { return state.mentioned.indexOf(v) < 0; }); }
   function allMentioned() { return state.mentioned.length >= VEHICLES.length; }
-  // Trio: prefer up to 3 not-yet-mentioned. Only when exactly ONE remains, pad with the
-  // two earliest-mentioned vehicles (state.mentioned[0], [1]) so the board still has three:
-  // 1 unmentioned + 2 earliest mentioned. If two remain, show just those two (no pad).
+  // Game over after 6 successful rides (only 2 un-named left). Misses (7 s timeout) never count.
+  function gameOver() { return state.mentioned.length >= ROUNDS_TO_END || unmentioned().length <= VEHICLES.length - ROUNDS_TO_END; }
+  // A spoken vehicle only starts a trip if the child has NOT named it yet and (when a trio is up) it is on screen.
+  function isTripAnswer(v) {
+    if (!v || state.mentioned.indexOf(v) >= 0) return false;
+    return !(state.choices && state.choices.length) || state.choices.indexOf(v) >= 0;
+  }
+  // Trio (anti-repeat): from the not-yet-named vehicles, prefer ones that were NOT in the previous question
+  // (state.lastTrio), so 「你想坐A、B，定係C？」 doesn't keep naming the same vehicles; top up from the rest only
+  // if fewer than 3 are fresh. Positions are shuffled. Named vehicles are removed for good (never padded back).
+  // The game ends after 6 rides (2 left), so normally need >= 3 here; fewer is only a defensive edge case.
   // choices[0] = left (choice-a), [1] = centre (choice-b), [2] = right (choice-c):
   // the array order IS the on-screen left→right order; the question lists those Chinese names in that order.
-  // Free choice: any of the three starts a trip (no single named target).
   function pickChoiceTrio() {
     var need = unmentioned();
+    var last = state.lastTrio || [];
     var choices;
     if (need.length >= 3) {
-      choices = shuffle(need).slice(0, 3);
-    } else if (need.length === 1) {
-      var pool = [need[0]];
-      for (var mi = 0; mi < state.mentioned.length && pool.length < 3; mi++) {
-        var mv = state.mentioned[mi];
-        if (pool.indexOf(mv) < 0) pool.push(mv);
-      }
-      choices = shuffle(pool);
+      var fresh = shuffle(need.filter(function (v) { return last.indexOf(v) < 0; }));
+      var stale = shuffle(need.filter(function (v) { return last.indexOf(v) >= 0; }));
+      choices = shuffle(fresh.concat(stale).slice(0, 3));
     } else {
-      choices = need.length ? shuffle(need) : [];
+      choices = shuffle(need);
     }
+    state.lastTrio = choices.slice();
     state.target = null; state.choices = choices; state.quizArmed = false;
     var list = tilesList();
     if (list) { list.classList.remove('intro-solo'); list.classList.add('choice-trio'); }
@@ -2189,7 +2195,7 @@
   function advanceAfterQuestion() {
     state.quizArmed = false; clearQuizTimer();
     state.target = null; state.choices = null;
-    if (allMentioned()) goToGoodbye();
+    if (gameOver()) goToGoodbye();
     else goToCover({ after: true });
   }
   // Opening: ONE vehicle visible at a time, random order; Chinese name only (no English speech).
@@ -2241,7 +2247,7 @@
   // question ends all three are neutral while listening. Free choice among the three.
   function askRideChoice() {
     if (state.screen !== 'cover') return;
-    if (allMentioned()) { goToGoodbye(); return; }
+    if (gameOver()) { goToGoodbye(); return; }
     unlisten(); stopSpeaking(); ensureAudio();
     var trio = pickChoiceTrio();
     if (!trio.choices.length) { goToGoodbye(); return; }
@@ -2308,7 +2314,7 @@
     tiles.forEach(function (t) { t.classList.remove('chosen'); });
     if (opts.first || opts.reset) {
       heard.textContent = ''; focusEl(coverTitle);
-      state.mentioned = []; state.target = null; state.choices = null; state.rounds = 0;
+      state.mentioned = []; state.lastTrio = []; state.target = null; state.choices = null; state.rounds = 0;
       stats.mentioned = []; showAllTilesBoard();
     }
     if (state.mode === 'voice' && state.needTap) { talkBtn.hidden = false; updateIndicator(); return; }
@@ -2365,7 +2371,7 @@
     if (state.screen !== 'trip') return;
     stage.hidden = true; stage.removeAttribute('data-v'); hideTripBanner();
     state.target = null; state.choices = null;
-    if (allMentioned()) goToGoodbye(); else goToCover({ after: true });
+    if (gameOver()) goToGoodbye(); else goToCover({ after: true });
   }
 
   // Quiz tap: tapped figure speaks zh+en, then next question. Tap does NOT mark mentioned-by-child and never starts a trip.
@@ -2434,7 +2440,7 @@
     state.screen = 'goodbye'; state.vehicle = null;
     show(goodbye); stage.hidden = true; hideTripBanner(); document.body.classList.remove('tripping');
     focusEl(byeTitle);
-    announce(zh('做得好好！拜拜！八架車都講晒。家長可以用右上角「再玩過」掣。') + ' ' + en('Well done! Bye bye! You named all eight. Parents: the Play again button is at the top right.'));
+    announce(zh('做得好好！拜拜！家長可以用右上角「再玩過」掣。') + ' ' + en('Well done! Bye bye! Parents: the Play again button is at the top right.'));
     var wellLen = playBye(0.3, 'wellDone');                   // 「做得好好！」
     byeTimers.push(setTimeout(function () { if (state.screen === 'goodbye') playBye(0, 'bye'); }, (0.3 + wellLen + 0.5) * 1000));   // then one 「拜拜！」
     updateIndicator();
@@ -2524,11 +2530,11 @@
 
   /* ---------- test / debug hook (read-only) ---------- */
   window.SayAndGo = {
-    APP_NAME: APP_NAME, TRIP_MS: TRIP_MS, ROUNDS_TO_END: ROUNDS_TO_END, HOLD_MS: HOLD_MS, QUIZ_MISS_MS: QUIZ_MISS_MS, INTRO_GAP_MS: INTRO_GAP_MS, PROMPT: PROMPT, PROMPT_EN: PROMPT_EN, askZh: askZh, askEn: askEn, askQuestionZh: askQuestionZh, CLIP_FILES: CLIP_FILES, WORDS: WORDS, LANGS: LANGS, SAY_NAME: SAY_NAME, SAY_EN: SAY_EN, VEHICLES: VEHICLES, shuffle: shuffle, pickChoiceTrio: pickChoiceTrio, teachName: teachName, markMentioned: markMentioned, clearMentioned: function () { state.mentioned = []; stats.mentioned = []; state.rounds = 0; state.target = null; state.choices = null; }, failClipsForTest: function () { clipsForceFailed = true; Object.keys(clips).forEach(function (k) { clips[k].buffer = null; clips[k].data = null; clips[k].state = "failed"; }); }, askRideChoice: askRideChoice, runNameIntro: runNameIntro,
+    APP_NAME: APP_NAME, TRIP_MS: TRIP_MS, ROUNDS_TO_END: ROUNDS_TO_END, HOLD_MS: HOLD_MS, QUIZ_MISS_MS: QUIZ_MISS_MS, INTRO_GAP_MS: INTRO_GAP_MS, PROMPT: PROMPT, PROMPT_EN: PROMPT_EN, askZh: askZh, askEn: askEn, askQuestionZh: askQuestionZh, CLIP_FILES: CLIP_FILES, WORDS: WORDS, LANGS: LANGS, SAY_NAME: SAY_NAME, SAY_EN: SAY_EN, VEHICLES: VEHICLES, shuffle: shuffle, pickChoiceTrio: pickChoiceTrio, isTripAnswer: isTripAnswer, gameOver: gameOver, teachName: teachName, markMentioned: markMentioned, clearMentioned: function () { state.mentioned = []; state.lastTrio = []; stats.mentioned = []; state.rounds = 0; state.target = null; state.choices = null; }, failClipsForTest: function () { clipsForceFailed = true; Object.keys(clips).forEach(function (k) { clips[k].buffer = null; clips[k].data = null; clips[k].state = "failed"; }); }, askRideChoice: askRideChoice, runNameIntro: runNameIntro,
     match: matchVehicle, matchDetail: matchDetail, normalise: normalise, babyVariants: babyVariants,
     matchExact: function (t) { return matchExact(t).best; }, vowelMatch: function (t) { return vowelMatch(normalise(t), []); }, finalsOf: finalsOf, VOWEL_NAMES: VOWEL_NAMES, VOWEL_SKIP: VOWEL_SKIP,
     getState: function () {
-      return { screen: state.screen, mode: state.mode, rounds: state.rounds, vehicle: state.vehicle, target: state.target, choices: state.choices && state.choices.slice(), mentioned: state.mentioned.slice(), introOrder: state.introOrder && state.introOrder.slice(), introSteps: (stats.introSteps || []).slice(), trios: (stats.trios || []).slice(), teaches: (stats.teaches || []).slice(), spokenNames: stats.spokenNames.slice(), narrating: !!state.narrating, quizArmed: !!state.quizArmed, blockedKind: state.blockedKind,
+      return { screen: state.screen, mode: state.mode, rounds: state.rounds, vehicle: state.vehicle, target: state.target, choices: state.choices && state.choices.slice(), mentioned: state.mentioned.slice(), lastTrio: (state.lastTrio || []).slice(), introOrder: state.introOrder && state.introOrder.slice(), introSteps: (stats.introSteps || []).slice(), trios: (stats.trios || []).slice(), teaches: (stats.teaches || []).slice(), spokenNames: stats.spokenNames.slice(), narrating: !!state.narrating, quizArmed: !!state.quizArmed, blockedKind: state.blockedKind,
         needTap: state.needTap, talkReason: state.talkReason || null, talkVisible: !talkBtn.hidden, speaking: speaking,
         listening: rec.running, recActive: !!rec.inst, lang: rec.lang, starts: rec.starts, granted: rec.granted, lastError: rec.lastError,
         langs: LANGS.slice(), matches: stats.matches.slice(), trips: stats.trips.slice(), sounds: stats.sounds.slice(), tapsSpoken: stats.tapsSpoken.slice(), heard: stats.heard.slice(),

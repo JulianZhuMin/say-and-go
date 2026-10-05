@@ -17,7 +17,7 @@ Matching is lenient for toddlers: the name can be anywhere in what was heard ("�
 
 Vowel matching for toddler voices (second path, used only when no name was found): children's voices are high and their consonants are often unclear, so every character the recogniser wrote is turned into its Cantonese finals (the vowel + ending, tones ignored; characters with several readings try all of them). If consecutive characters have the same finals as a name, syllable by syllable, it counts even when the consonants differ or are missing: 飛機 fei-gei, 地鐵 dei-tit, 火車 fo-ce, 巴士 baa-si, 電單車 din-daan-ce, 消防車 siu-fong-ce (for the 3-syllable names the last two are enough: 番車, 黃車). So 記鐵 / 利鐵 → MTR, 媽士 / 吧士 → bus, 小防車 → fire truck, 美美 → plane, while 白士, 爸爸, 巴巴, 小巴, 公車, 港鐵 and 東鐵 still do nothing. More matching syllables win, then more real characters. Family words (爸爸, 媽媽, 哥哥, 姐姐 …), 多謝, 坐車 and 俾 / 畀 are never used for vowel matching. The character → final table covers common Traditional and Simplified characters and was generated from [rime-cantonese](https://github.com/rime/rime-cantonese) (CC BY 4.0).
 
-All the game's spoken lines are pre-recorded (Hong Kong Cantonese child-friendly voice for Chinese, en-US voice for English: the per-vehicle questions, the eight names, the help messages and the goodbye: 「做得好好！」 then 「拜拜！」 once). The phone's own speech voice is only used if a clip can't load. While the game is listening, a big see-through toy microphone glows on the screen. After the child has named all eight vehicles the game says goodbye.
+All the game's spoken lines are pre-recorded (Hong Kong Cantonese child-friendly voice for Chinese, en-US voice for English: the per-vehicle questions, the eight names, the help messages and the goodbye: 「做得好好！」 then 「拜拜！」 once). The phone's own speech voice is only used if a clip can't load. While the game is listening, a big see-through toy microphone glows on the screen. After 6 rides (6 of the 8 vehicles named) the game says goodbye.
 
 - Tap **開始 Start**, then allow the microphone.
 - iPhone/iPad: use Safari, and turn on Siri and Dictation (Settings → General → Keyboard → Enable Dictation).
@@ -37,12 +37,12 @@ After a slow one-by-one bilingual intro (random order; each figure alone, highli
 2. Asks **one Cantonese sentence** that lists those Chinese names left → right:
    - three: 「你想坐{左}、{中}，定係{右}？」
    - two: 「你想坐{甲}，定係{乙}？」
-   - one: 「你想坐{甲}？」
    Spoken with the same pre-recorded HiuGaai clips as the intro (`phrase-want` + `name-*` + `phrase-or`). VoiceOver announces the same Chinese sentence.
 3. While the sentence plays, as each vehicle **name** is spoken that figure highlights, then clears when the name ends; the next name lights the next figure. After the question ends / while listening, **no** highlights — all three stay the same neutral state.
 4. **Any** of the three on-screen vehicles (correct Chinese name or alias) starts that vehicle’s trip and counts as named-by-child. Names outside the three are ignored. ~7 s silence / wrong → next round (no teach-back).
 5. Tap a card during the 7 s: it says its zh + en name (highlighted), no trip, does not count; the 7 s restart.
-6. Named vehicles never appear in later trios. The game ends when the child has named all eight.
+6. A vehicle the child names (and rides) is removed for good: it never appears in a later trio and can never start another trip. Each new trio is picked only from the remaining un-named vehicles and prefers ones that were not in the previous question, so the same names don't keep coming back.
+7. The game is **6 rides** long. After the 6th successful ride (2 vehicles left) it says goodbye; the last two are not asked. A ~7 s miss gives a new trio and does not count as a ride.
 
 Speech recognition is **Chinese-only** (zh-HK / yue-Hant-HK, then Mandarin zh-CN / zh-TW). Aliases: ferry accepts 「渡輪」 and 「船」; MTR accepts 「地鐵」 and 「火車」.
 
