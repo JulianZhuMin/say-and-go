@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Say &amp; Go 講聲即郁</title>
-<meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」、「消防車」、「渡輪」、「救傷車」或者「的士」，或者講個英文名，睇佢出發！ Say airplane, train, bus, Motorbike, Fire truck, Ferry, ambulance or taxi.">
-<meta name="app-version" content="2026-10-05d-eight-quiz">
+<meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」、「消防车」或者「渡輪」，或者講個英文名，睇佢出發！ Say the Cantonese or English name of the plane, train, bus, motorbike, fire truck or ferry and watch it go. A voice game for toddlers.">
+<meta name="app-version" content="2026-10-05b-ferry-bilingual">
 <meta name="theme-color" content="#4dabf7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -99,28 +99,25 @@
   }
   #cover-title .en { font-size: .6em; color: #364fc7; margin-left: .4em; display: inline-block; }
   .cover-hint { margin: 0; text-align: center; font-weight: 800; color: #364fc7; font-size: clamp(14px, 3vmin, 24px); }
-  /* Eight vehicles in DOM. Intro = one-by-one (intro-solo). Quiz = random trio (choice-a/b/c). */
+  /* Play area: the SIX vehicle cards sit AROUND the big listening microphone, which has its own empty grid cell
+     (absolutely positioned over that cell, so it never covers a card; pointer-events:none).
+     landscape / iPad / computer (3 x 3):   plane | MIC  | mtr
+                                            bus   | fire | moto
+                                            ---- ferry (full width) ----
+     portrait phones (2 columns):           plane | mtr
+                                            -- MIC --
+                                            bus   | moto
+                                            fire  | ferry             */
   .tiles {
     list-style: none; margin: 0; padding: 0; flex: 1 1 auto; min-height: 0;
     display: grid; gap: var(--gap);
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-template-rows: repeat(3, minmax(0, 1fr));
-    grid-template-areas: "plane mic mtr" "bus fire moto" "ferry ambulance taxi";
-  }
-  .tiles.choice-trio {
-    grid-template-rows: minmax(0, 1fr);
-    grid-template-areas: "choice-a mic choice-b" ". choice-c .";
-  }
-  .tiles.intro-solo {
-    grid-template-columns: 1fr; grid-template-rows: 1fr; grid-template-areas: "intro-solo";
+    grid-template-areas: "plane mic mtr" "bus fire moto" "ferry ferry ferry";
   }
   .tiles li { min-width: 0; min-height: 0; display: flex; }
   .tiles li.slot-plane { grid-area: plane; } .tiles li.slot-mtr { grid-area: mtr; } .tiles li.slot-bus { grid-area: bus; }
-  .tiles li.slot-moto { grid-area: moto; } .tiles li.slot-fire { grid-area: fire; }
-  .tiles li.slot-ferry { grid-area: ferry; } .tiles li.slot-ambulance { grid-area: ambulance; } .tiles li.slot-taxi { grid-area: taxi; }
-  .tiles li.choice-a { grid-area: choice-a; } .tiles li.choice-b { grid-area: choice-b; } .tiles li.choice-c { grid-area: choice-c; }
-  .tiles li.intro-solo-slot { grid-area: intro-solo; }
-  .tiles li.choice-hidden { display: none !important; }
+  .tiles li.slot-moto { grid-area: moto; } .tiles li.slot-fire { grid-area: fire; } .tiles li.slot-ferry { grid-area: ferry; }
   .tile {
     flex: 1; min-height: 0; min-width: 0; border: 0; cursor: pointer; border-radius: 5vmin;
     background: #fff; box-shadow: 0 1.2vmin 0 rgba(28,61,143,.18), 0 2vmin 5vmin rgba(28,61,143,.18);
@@ -140,24 +137,22 @@
   .tile[data-v="moto"]  { background: linear-gradient(180deg, #fff 0%, #fff0f6 100%); color: #a61e4d; }
   .tile[data-v="fire"]  { background: linear-gradient(180deg, #fff 0%, #ffe3e3 100%); color: #b02525; }
   .tile[data-v="ferry"] { background: linear-gradient(180deg, #fff 0%, #e6fcf5 100%); color: #087f5b; }
-  .tile[data-v="ambulance"] { background: linear-gradient(180deg, #fff 0%, #fff4e6 100%); color: #c2255c; }
-  .tile[data-v="taxi"] { background: linear-gradient(180deg, #fff 0%, #ffe3e3 100%); color: #c92a2a; }
-  .tile.intro-focus { transform: scale(1.08); box-shadow: 0 0 0 .9vmin #ffd43b, 0 1.2vmin 0 rgba(0,0,0,.12); z-index: 2; }
+  .tile.intro-focus { transform: scale(1.06); box-shadow: 0 0 0 .8vmin #ffd43b, 0 1.2vmin 0 rgba(0,0,0,.12); z-index: 2; }
   .tile.intro-dim { opacity: .28; filter: grayscale(.35); }
-  .tile.teach-focus { transform: scale(1.06); box-shadow: 0 0 0 .8vmin #69db7c, 0 1.2vmin 0 rgba(0,0,0,.12); z-index: 2; }
   @media (max-aspect-ratio: 4/5) {
     .play { --gap: 1.6vh; --mic-row: clamp(96px, 17vh, 280px); }
     .tiles { grid-template-columns: repeat(2, minmax(0, 1fr));
-      grid-template-rows: minmax(0, 1fr) var(--mic-row) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
-      grid-template-areas: "plane mtr" "mic mic" "bus moto" "fire ferry" "ambulance taxi"; }
-    .tiles.choice-trio {
-      grid-template-rows: minmax(0, 1fr) var(--mic-row) minmax(0, 1fr);
-      grid-template-areas: "choice-a choice-b" "mic mic" "choice-c choice-c";
-    }
-    .tiles.intro-solo { grid-template-columns: 1fr; grid-template-rows: 1fr; grid-template-areas: "intro-solo"; }
+      grid-template-rows: minmax(0, 1fr) var(--mic-row) minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas: "plane mtr" "mic mic" "bus moto" "fire ferry"; }
+    .tiles li.slot-ferry .tile { flex-direction: column; gap: 0; }
+    .tiles li.slot-ferry .tile .pic { flex: 1 1 auto; width: 100%; height: auto; max-width: none; aspect-ratio: auto; }
     .tile { border-radius: 3.4vh; padding: 1vh 2.5vw; gap: .4vh; }
-    .tile .label .zh { font-size: clamp(22px, 7vw, 52px); }
-    .tile .label .en { font-size: clamp(11px, 3.2vw, 24px); }
+    .tile .label .zh { font-size: clamp(24px, 8vw, 58px); }
+    .tile .label .en { font-size: clamp(12px, 3.6vw, 26px); }
+    /* landscape ferry spans the bottom row: picture beside its name, like the old wide fire card */
+    .tiles li.slot-ferry .tile { flex-direction: row; gap: 2.4vmin; }
+    .tiles li.slot-ferry .tile .pic { flex: 0 1 auto; width: auto; height: 100%; aspect-ratio: 280 / 160; min-width: 0; max-width: 55%; }
+    .tiles li.slot-ferry .tile .label { flex: 0 0 auto; } .tiles li.slot-ferry .tile .label .zh { white-space: nowrap; }
   }
   /* Short landscape (phone on its side): less empty space above, so the cards and the microphone stay big */
   @media (min-aspect-ratio: 4/5) and (max-height: 520px) {
@@ -243,9 +238,7 @@
   #stage[data-v="bus"] .scene-bus, #stage[data-v="bus"] .mover-bus,
   #stage[data-v="moto"] .scene-moto, #stage[data-v="moto"] .mover-moto,
   #stage[data-v="fire"] .scene-fire, #stage[data-v="fire"] .mover-fire,
-  #stage[data-v="ferry"] .scene-ferry, #stage[data-v="ferry"] .mover-ferry,
-  #stage[data-v="ambulance"] .scene-ambulance, #stage[data-v="ambulance"] .mover-ambulance,
-  #stage[data-v="taxi"] .scene-taxi, #stage[data-v="taxi"] .mover-taxi { display: block; }
+  #stage[data-v="ferry"] .scene-ferry, #stage[data-v="ferry"] .mover-ferry { display: block; }
   .scene { position: absolute; inset: 0; animation: scene-in 4s ease both; }
   @keyframes scene-in { 0% { opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { opacity: 0; } }
   .mover svg { width: 100%; height: 100%; display: block; overflow: visible; }
@@ -254,7 +247,7 @@
   .stage-only { display: none; }          /* speed lines, exhaust puffs, headlight beam: only on the trip */
   #stage .stage-only { display: inline; }
 
-  /* Airplane: takes off bottom-left, climbs, swoops down and up again, exits top-right */
+  /* Aeroplane: takes off bottom-left, climbs, swoops down and up again, exits top-right */
   .scene-plane { background: linear-gradient(180deg, rgba(116,192,252,.55) 0%, rgba(165,216,255,.25) 60%, rgba(255,255,255,0) 100%); animation-duration: 3.6s; }
   .cloud { position: absolute; width: 22vmin; height: 8vmin; background: #fff; border-radius: 8vmin; opacity: .95; animation: cloud-drift 3.6s linear both; }
   .cloud::before, .cloud::after { content: ""; position: absolute; background: #fff; border-radius: 50%; }
@@ -500,33 +493,6 @@
   @keyframes ferry-bob { 0%, 100% { transform: translateY(0); } 25% { transform: translateY(-4px); } 50% { transform: translateY(3px); } 75% { transform: translateY(-3px); } }
   #stage .ferry-wake { animation: puff .9s ease-out infinite; }
 
-
-  /* Ambulance (救傷車): HK white van + red stripe */
-  .scene-ambulance { background: linear-gradient(180deg, rgba(255,255,255,0) 25%, rgba(255,236,153,.4) 70%); animation-duration: 4.1s; }
-  .scene-ambulance .road { height: 22vh; } .scene-ambulance .road-line { animation: none; }
-  .mover-ambulance { position: absolute; left: -45%; bottom: 10vh; width: min(72vmin, 560px); height: calc(min(72vmin, 560px) * 150 / 260);
-    animation: amb-drive 4.1s both; filter: drop-shadow(0 1.6vmin .8vmin rgba(0,0,0,.2)); }
-  @keyframes amb-drive { 0% { left: -45%; } 32% { left: 28%; } 38%, 58% { left: 32%; } 100% { left: 110%; } }
-  #stage .amb-tilt { width: 100%; height: 100%; transform-origin: 70% 95%; animation: amb-tilt 4.1s linear both; }
-  @keyframes amb-tilt { 0%, 30% { transform: rotate(0deg); } 33% { transform: rotate(1.4deg); } 37%, 58% { transform: rotate(0deg); }
-    62% { transform: rotate(-1deg); } 100% { transform: rotate(0.6deg); } }
-  #stage .amb-body { animation: fire-rock .35s ease-in-out infinite alternate; }
-  #stage .amb-wheel { animation: spin .5s linear infinite; }
-  #stage .amb-light { animation: amb-flash .42s linear infinite; }
-  @keyframes amb-flash { 0%, 49% { opacity: 1; } 50%, 100% { opacity: .25; } }
-
-  /* Taxi (的士): classic Hong Kong urban red taxi */
-  .scene-taxi { background: linear-gradient(180deg, rgba(255,255,255,0) 25%, rgba(255,201,201,.35) 70%); animation-duration: 3.8s; }
-  .scene-taxi .road { height: 22vh; } .scene-taxi .road-line { animation: none; }
-  .mover-taxi { position: absolute; left: -42%; bottom: 10vh; width: min(64vmin, 500px); height: calc(min(64vmin, 500px) * 140 / 240);
-    animation: taxi-drive 3.8s both; filter: drop-shadow(0 1.4vmin .7vmin rgba(0,0,0,.2)); }
-  @keyframes taxi-drive { 0% { left: -42%; } 30% { left: 30%; } 36%, 55% { left: 34%; } 100% { left: 110%; } }
-  #stage .taxi-tilt { width: 100%; height: 100%; transform-origin: 70% 95%; animation: taxi-tilt 3.8s linear both; }
-  @keyframes taxi-tilt { 0%, 28% { transform: rotate(0deg); } 31% { transform: rotate(1.5deg); } 35%, 55% { transform: rotate(0deg); }
-    60% { transform: rotate(-1deg); } 100% { transform: rotate(0.5deg); } }
-  #stage .taxi-body { animation: fire-rock .3s ease-in-out infinite alternate; }
-  #stage .taxi-wheel { animation: spin .45s linear infinite; }
-
   /* ---------- Reduced motion: no flying/crossing, the vehicle just appears and fades; sounds still play ---------- */
   @media (prefers-reduced-motion: reduce) {
     #start-btn, #talk-btn { animation: none; }
@@ -537,14 +503,12 @@
     #stage .scene, #stage .scene *, #stage .mover * { animation: none !important; }
     #stage .scene { animation: rm-fade var(--dur, 3s) ease both !important; }
     #stage .mover { animation: rm-fade var(--dur, 3s) ease both !important; transform: none !important; }
-    #stage .mover-mtr, #stage .mover-bus, #stage .mover-moto, #stage .mover-fire, #stage .mover-ferry, #stage .mover-ambulance, #stage .mover-taxi { left: 50%; }
+    #stage .mover-mtr, #stage .mover-bus, #stage .mover-moto, #stage .mover-fire, #stage .mover-ferry { left: 50%; }
     #stage .mover-mtr { margin-left: calc(min(100vmin, 760px) / -2); }
     #stage .mover-bus { margin-left: calc(min(70vmin, 540px) / -2); }
     #stage .mover-moto { margin-left: calc(min(64vmin, 500px) / -2); }
     #stage .mover-fire { margin-left: calc(min(78vmin, 600px) / -2); }
     #stage .mover-ferry { margin-left: calc(min(78vmin, 620px) / -2); bottom: 18vh; }
-    #stage .mover-ambulance { margin-left: calc(min(72vmin, 560px) / -2); }
-    #stage .mover-taxi { margin-left: calc(min(64vmin, 500px) / -2); }
     .arm-wave { animation-duration: 1.8s; }
     .wave-lines, .float-heart { animation: none; }
   }
@@ -826,40 +790,6 @@
           <path d="M70 122 q70 14 140 0" stroke="#1b5e2a" stroke-width="3" fill="none" stroke-linecap="round" opacity=".5"/>
         </g>
       </symbol>
-
-      <symbol id="art-ambulance" viewBox="0 0 260 150">
-        <rect class="tile-only" x="2" y="142" width="256" height="6" rx="3" fill="#868e96"/>
-        <g class="stage-only"><circle class="amb-light" cx="118" cy="28" r="10" fill="#ff6b6b"/><circle class="amb-light" cx="142" cy="28" r="10" fill="#74c0fc" style="animation-delay:.21s"/></g>
-        <g class="amb-body">
-          <path d="M18 118 L28 70 H168 L178 48 H236 Q248 48 248 60 V118 Z" fill="#f8f9fa" stroke="#495057" stroke-width="4" stroke-linejoin="round"/>
-          <path d="M20 96 H246" stroke="#e03131" stroke-width="10"/><path d="M20 96 H246" stroke="#fff" stroke-width="3" opacity=".7"/>
-          <g fill="#a5d8ff" stroke="#495057" stroke-width="3"><path d="M182 56 H232 V86 H178 Z"/><rect x="40" y="56" width="36" height="28" rx="5"/><rect x="84" y="56" width="36" height="28" rx="5"/><rect x="128" y="56" width="36" height="28" rx="5"/></g>
-          <circle cx="208" cy="72" r="8" fill="#ffd8a8"/><path d="M199 68 h18 v-4 q-9 -7 -18 0 Z" fill="#e03131"/>
-          <path d="M204 76 q4 3 8 0" stroke="#5c3d2e" stroke-width="2" fill="none" stroke-linecap="round"/>
-          <rect x="92" y="100" width="36" height="12" rx="2" fill="#e03131"/><rect x="104" y="88" width="12" height="36" rx="2" fill="#e03131"/>
-          <rect x="100" y="36" width="60" height="12" rx="4" fill="#212529" stroke="#495057" stroke-width="2"/>
-          <rect x="108" y="38" width="18" height="8" rx="2" fill="#ff6b6b"/><rect x="134" y="38" width="18" height="8" rx="2" fill="#74c0fc"/>
-          <rect x="232" y="108" width="18" height="10" rx="3" fill="#495057"/><circle cx="244" cy="100" r="5" fill="#ffd43b" stroke="#e67700" stroke-width="2"/>
-        </g>
-        <g class="wheel amb-wheel"><circle cx="58" cy="126" r="18" fill="#343a40"/><circle cx="58" cy="126" r="9" fill="#ced4da"/><path d="M48 126 H68 M58 116 V136" stroke="#868e96" stroke-width="3"/></g>
-        <g class="wheel amb-wheel"><circle cx="200" cy="126" r="18" fill="#343a40"/><circle cx="200" cy="126" r="9" fill="#ced4da"/><path d="M190 126 H210 M200 116 V136" stroke="#868e96" stroke-width="3"/></g>
-      </symbol>
-      <symbol id="art-taxi" viewBox="0 0 240 140">
-        <!-- classic Hong Kong urban red taxi, facing right -->
-        <rect class="tile-only" x="2" y="132" width="236" height="6" rx="3" fill="#868e96"/>
-        <g class="taxi-body">
-          <path d="M14 108 L28 70 H70 L88 42 H170 L192 70 H220 Q232 70 232 82 V108 Z" fill="#fa5252" stroke="#c92a2a" stroke-width="4" stroke-linejoin="round"/>
-          <path d="M72 70 L88 46 H166 L180 70 Z" fill="#a5d8ff" stroke="#c92a2a" stroke-width="3"/>
-          <path d="M16 90 H228" stroke="#fff" stroke-width="5" opacity=".9"/>
-          <rect x="108" y="34" width="36" height="12" rx="3" fill="#212529"/><path d="M114 40 H138" stroke="#ffd43b" stroke-width="3"/>
-          <circle cx="200" cy="82" r="8" fill="#ffd8a8"/><path d="M191 78 h18 v-3 q-9 -6 -18 0 Z" fill="#212529"/>
-          <path d="M196 86 q4 3 8 0" stroke="#5c3d2e" stroke-width="2" fill="none" stroke-linecap="round"/>
-          <circle cx="224" cy="100" r="5" fill="#ffd43b" stroke="#e67700" stroke-width="2"/>
-          <rect x="96" y="96" width="48" height="10" rx="2" fill="#212529"/><path d="M102 101 H138" stroke="#ffd43b" stroke-width="2.5" stroke-dasharray="4 2"/>
-        </g>
-        <g class="wheel taxi-wheel"><circle cx="54" cy="116" r="16" fill="#343a40"/><circle cx="54" cy="116" r="8" fill="#ced4da"/><path d="M45 116 H63 M54 107 V125" stroke="#868e96" stroke-width="3"/></g>
-        <g class="wheel taxi-wheel"><circle cx="186" cy="116" r="16" fill="#343a40"/><circle cx="186" cy="116" r="8" fill="#ced4da"/><path d="M177 116 H195 M186 107 V125" stroke="#868e96" stroke-width="3"/></g>
-      </symbol>
     </defs>
   </svg>
 
@@ -876,8 +806,6 @@
       <svg viewBox="0 0 220 150" focusable="false"><use href="#art-moto"/></svg>
       <svg viewBox="0 0 260 150" focusable="false" style="width:clamp(66px,19vmin,178px)"><use href="#art-fire"/></svg>
       <svg viewBox="0 0 280 160" focusable="false" style="width:clamp(70px,20vmin,190px)"><use href="#art-ferry"/></svg>
-      <svg viewBox="0 0 260 150" focusable="false" style="width:clamp(60px,17vmin,160px)"><use href="#art-ambulance"/></svg>
-      <svg viewBox="0 0 240 140" focusable="false" style="width:clamp(56px,16vmin,150px)"><use href="#art-taxi"/></svg>
     </div>
     <button type="button" id="start-btn" aria-describedby="start-note"><span class="zh">開始</span><span class="en" lang="en">Start</span></button>
     <p id="start-note" class="start-note">撳「開始」之後，瀏覽器會問可唔可以用咪高峰，請撳「允許」。<br><span lang="en">After you tap Start, the browser asks to use the microphone. Please tap Allow.</span></p>
@@ -888,7 +816,7 @@
   <main id="cover" class="screen" hidden aria-labelledby="cover-title">
     <div id="mic-ind" data-s="off" aria-hidden="true"><span class="dot"></span><span id="mic-ind-text">未聽</span></div>
     <h1 id="cover-title" tabindex="-1">你想坐咩呀？<span class="en" lang="en">What would you like to ride?</span></h1>
-    <p class="cover-hint" id="cover-hint">講啱個名佢就出發；撳圖會聽名再換題。 <span lang="en">Say the right name and it goes! Tap to hear a name, then next.</span></p>
+    <p class="cover-hint" id="cover-hint">講個名，佢就出發！撳圖可以聽個名。 <span lang="en">Say its name and it goes! Tap a picture to hear its name.</span></p>
     <div class="play">
       <!-- Big see-through toy microphone, shown only while listening. Silent for VoiceOver (no live region). -->
       <div id="mic-big" role="img" aria-label="咪高峰：而家可以講嘢" hidden>
@@ -944,8 +872,6 @@
         <li class="slot-moto"><button type="button" class="tile" data-v="moto" aria-label="電單車"><span class="pic" aria-hidden="true"></span><span class="label"><span class="zh">電單車</span><span class="en" lang="en">Motorbike</span></span></button></li>
         <li class="slot-fire"><button type="button" class="tile" data-v="fire" aria-label="消防車"><span class="pic" aria-hidden="true"></span><span class="label"><span class="zh">消防車</span><span class="en" lang="en">Fire truck</span></span></button></li>
         <li class="slot-ferry"><button type="button" class="tile" data-v="ferry" aria-label="渡輪"><span class="pic" aria-hidden="true"></span><span class="label"><span class="zh">渡輪</span><span class="en" lang="en">Ferry</span></span></button></li>
-        <li class="slot-ambulance"><button type="button" class="tile" data-v="ambulance" aria-label="救傷車"><span class="pic" aria-hidden="true"></span><span class="label"><span class="zh">救傷車</span><span class="en" lang="en">ambulance</span></span></button></li>
-        <li class="slot-taxi"><button type="button" class="tile" data-v="taxi" aria-label="的士"><span class="pic" aria-hidden="true"></span><span class="label"><span class="zh">的士</span><span class="en" lang="en">taxi</span></span></button></li>
       </ul>
     </div>
     <p id="heard" aria-hidden="true"></p>
@@ -967,10 +893,6 @@
     <div class="mover mover-fire"><div class="fire-tilt"></div></div>
     <div class="scene scene-ferry"><div class="harbour-skyline"></div><div class="water"></div><span class="wave w1"></span><span class="wave w2"></span><span class="wave w3"></span></div>
     <div class="mover mover-ferry"><div class="ferry-bob"></div></div>
-    <div class="scene scene-ambulance"><span class="bldg b1"></span><span class="bldg b2"></span><span class="bldg b3"></span><div class="road"><div class="road-line"></div></div></div>
-    <div class="mover mover-ambulance"><div class="amb-tilt"></div></div>
-    <div class="scene scene-taxi"><span class="bldg b1"></span><span class="bldg b3"></span><div class="road"><div class="road-line"></div></div></div>
-    <div class="mover mover-taxi"><div class="taxi-tilt"></div></div>
   </div>
 
   <!-- ===== Help screen: microphone denied / speech recognition not available ===== -->
@@ -1042,22 +964,21 @@
 (function () {
   'use strict';
   /* ===================== settings ===================== */
-  var ROUNDS_TO_END = 8;          // game ends when child has named all 8 vehicles themselves
-  var TRIP_MS = { plane: 3600, mtr: 4200, bus: 4200, moto: 3400, fire: 4000, ferry: 4400, ambulance: 4100, taxi: 3800 };
+  var ROUNDS_TO_END = 3;          // completed voice trips before the goodbye screen
+  var TRIP_MS = { plane: 3600, mtr: 4200, bus: 4200, moto: 3400, fire: 4000, ferry: 4400 };
   var HOLD_MS = 1500;             // long-press for the parent "Play again" control
   var CLICK_DEDUPE_MS = 700;
   var HOLD_PREFIX_MS = 700;       // wait for the rest of an unfinished word that could mean another vehicle
   var IDLE_MS = 90000;            // stop listening after 90 s of nothing, show the Talk button
-  var QUIZ_MISS_MS = 7000;       // 7 s after question asked
   var START_TIMEOUT_MS = 4000;    // a start() that never begins (iOS bug) is retried
   var RETRY_DELAYS = [300, 1000, 2000];
-  var PROMPT = '你想坐飛機、地鐵、巴士、電單車、消防車、渡輪、救傷車，定係的士呀？';
+  var PROMPT = '你想坐飛機、地鐵、巴士、電單車、消防車，定係渡輪呀？';
   var TAP_PROMPT = '撳一張圖，聽吓佢個名。';
-  var SAY_NAME = { plane: '飛機', mtr: '地鐵', bus: '巴士', moto: '電單車', fire: '消防車', ferry: '渡輪', ambulance: '救傷車', taxi: '的士' };
-  var SAY_EN = { plane: 'airplane', mtr: 'train', bus: 'Bus', moto: 'Motorbike', fire: 'Fire truck', ferry: 'Ferry', ambulance: 'ambulance', taxi: 'taxi' };
-  var VEHICLES = ['plane', 'mtr', 'bus', 'moto', 'fire', 'ferry', 'ambulance', 'taxi'];
-  var TRIP_ZH = { plane: '飛機起飛喇！飛呀飛！', mtr: '地鐵嚟喇，開門喇，嘟嘀！', bus: '巴士嚟喇，叮叮，到站喇！', moto: '電單車嚟喇，轟轟轟！', fire: '消防車嚟喇，嘀嘟嘀嘟！', ferry: '渡輪嚟喇，嘟嘟，過海喇！', ambulance: '救傷車嚟喇，嘀嘟嘀嘟，救人喇！', taxi: '的士嚟喇，嘟嘟，走喇！' };
-  var TRIP_EN = { plane: 'The plane takes off and swoops around the sky!', mtr: 'The train glides in, opens its doors with a do-di chime, and glides off!', bus: 'The double-decker bus pulls up at the bus stop, ding ding, toots its horn and drives off!', moto: 'The motorbike revs vroom vroom and zooms off down the road!', fire: 'The fire truck drives up with its siren going dee-daa dee-daa, stops, and drives off!', ferry: 'The green-and-white harbour ferry sails across the water, toots its horn, and chugs off!', ambulance: 'The white ambulance drives up with its siren, stops to help, and drives off!', taxi: 'The red Hong Kong taxi pulls up, toots its horn, and drives off!' };
+  var SAY_NAME = { plane: '飛機', mtr: '地鐵', bus: '巴士', moto: '電單車', fire: '消防車', ferry: '渡輪' };   // spoken when a picture is tapped (Cantonese)
+  var SAY_EN = { plane: 'airplane', mtr: 'train', bus: 'Bus', moto: 'Motorbike', fire: 'Fire truck', ferry: 'Ferry' };   // English display + intro spoken names
+  var VEHICLES = ['plane', 'mtr', 'bus', 'moto', 'fire', 'ferry'];
+  var TRIP_ZH = { plane: '飛機起飛喇！飛呀飛！', mtr: '地鐵嚟喇，開門喇，嘟嘀！', bus: '巴士嚟喇，叮叮，到站喇！', moto: '電單車嚟喇，轟轟轟！', fire: '消防車嚟喇，嘀嘟嘀嘟！' };
+  var TRIP_EN = { plane: 'The plane takes off and swoops around the sky!', mtr: 'The train glides in, opens its doors with a do-di chime, and glides off!', bus: 'The double-decker bus pulls up at the bus stop, ding ding, toots its horn and drives off!', moto: 'The motorbike revs vroom vroom and zooms off down the road!', fire: 'The fire truck drives up with its siren going dee-daa dee-daa, stops, and drives off!', ferry: 'The green-and-white harbour ferry sails across the water, toots its horn, and chugs off!' };
 
   /* ===================== word matching (lenient, for ~3-year-olds) =====================
      The name can be ANYWHERE in what was heard ("搭咩呀，搭飛機呀", "我要坐巴士"); filler words are ignored.
@@ -1093,16 +1014,12 @@
     ['mtr', 3, '地鐵', '地鐵車', '地鐵站', '火車', '火車仔', '=mtr', '=train', '=trains', '=subway', '=subways', '=metro', '=metros'],   // 地鐵 / 火車, or English MTR / train / subway / metro (no 港鐵 / 東鐵 / 地地 / 地車)
     ['bus', 3, '巴士', '巴士仔', '雙層巴士', '=bus', '=buses', '=doubledecker', '=doubledeckers'],        // 巴士, or English bus / double decker (no 巴巴 / 小巴 / 公車)
     ['moto', 3, '電單車', '電單', '摩托車', '摩托', '機車', '鐵馬', '=motorbike', '=motorbikes', '=motorcycle', '=motorcycles'],
-    ['fire', 3, '消防車', '消防', '救火車', '救火', '滅火車', '嘀嘟車', '嘀嘟嘀嘟', '嘀嘟', '=firetruck', '=firetrucks', '=fireengine', '=fireengines'],
+    ['fire', 3, '消防车', '消防', '救火車', '救火', '滅火車', '嘀嘟車', '嘀嘟嘀嘟', '嘀嘟', '=firetruck', '=firetrucks', '=fireengine', '=fireengines'],
     ['ferry', 3, '渡輪', '渡轮', '天星小輪', '天星渡輪', '=ferry', '=ferries', '=starferry', '=starferries'],
-    ['ambulance', 3, '救傷車', '救傷車', '救護車', '救护车', '救傷', '=ambulance', '=ambulances'],
-    ['taxi', 3, '的士', '德士', '計程車', '出租车', '=taxi', '=taxis', '=cab', '=cabs'],
     ['plane', 2, '灰機', '非機', '肥機', '飛飛', '飛雞'],
     ['moto', 2, '單單車', '單車', '丹車', '電車', '電電', '摩多', '嘟嘟車', '轟轟'],
     ['fire', 2, '消消車', '消消', '宵防', '蕭防', '消房', '滴嘟', '嘀嘀嘟'],
     ['ferry', 2, '渡渡', '輪輪', '嘟嘟船'],
-    ['ambulance', 2, '傷車', '護車', '救人車'],
-    ['taxi', 2, '的的', '士士'],
     ['plane', 1, '飛', '機'],
     ['moto', 1, '車車']   // baby word for "car": weakest, so any real name in the same phrase wins
   ];
@@ -1155,7 +1072,7 @@
               '几': '幾', '记': '記', '纪': '紀', '极': '極', '击': '擊', '计': '計', '积': '積', '迹': '跡', '货': '貨', '祸': '禍',
               '获': '獲', '课': '課', '颗': '顆', '点': '點', '垫': '墊', '颠': '顛', '弹': '彈', '担': '擔', '诞': '誕', '没': '沒',
               '脱': '脫', '驼': '駝', '灭': '滅', '萧': '蕭', '销': '銷', '箫': '簫', '旧': '舊', '视': '視', '戏': '戲', '游': '遊', '气': '氣', '数': '數',
-              '层': '層', '双': '雙', '东': '東', '贴': '貼', '钢': '鋼', '岗': '崗', '狮': '獅', '师': '師', '诗': '詩', '丝': '絲', '当': '當', '赶': '趕', '尔': '爾', '轮': '輪', '渡': '渡', '伤': '傷', '护': '護', '计': '計', '程': '程' };
+              '层': '層', '双': '雙', '东': '東', '贴': '貼', '钢': '鋼', '岗': '崗', '狮': '獅', '师': '師', '诗': '詩', '丝': '絲', '当': '當', '赶': '趕', '尔': '爾', '轮': '輪', '渡': '渡' };
   // Normalised text + where English words start/end (needed for the '=' whole-word entries).
   function normaliseB(s) {
     s = String(s == null ? '' : s).toLowerCase();
@@ -1335,12 +1252,10 @@
   stage.querySelector('.mover-moto .moto-tilt').appendChild(artCopy('art-moto'));
   stage.querySelector('.mover-fire .fire-tilt').appendChild(artCopy('art-fire'));
   stage.querySelector('.mover-ferry .ferry-bob').appendChild(artCopy('art-ferry'));
-  stage.querySelector('.mover-ambulance .amb-tilt').appendChild(artCopy('art-ambulance'));
-  stage.querySelector('.mover-taxi .taxi-tilt').appendChild(artCopy('art-taxi'));
 
   /* ===================== state ===================== */
-  var state = { screen: 'start', mode: 'voice', rounds: 0, vehicle: null, blockedKind: null, needTap: false, target: null, choices: null, introOrder: null, mentioned: [], quizArmed: false, quizTimer: 0 };
-  var stats = { trips: [], tapsSpoken: [], sounds: [], voice: { bye: 0 }, voiceVia: [], clipsPlayed: [], clipsFallback: [], ignored: [], heard: [], matches: [], introOrder: [], introSteps: [], trios: [], teaches: [], mentioned: [] };
+  var state = { screen: 'start', mode: 'voice', rounds: 0, vehicle: null, blockedKind: null, needTap: false };
+  var stats = { trips: [], tapsSpoken: [], sounds: [], voice: { bye: 0 }, voiceVia: [], clipsPlayed: [], clipsFallback: [], ignored: [], heard: [], matches: [] };
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition || null;
 
   /* ===================== audio (Web Audio; unlocked by the first tap for iOS) ===================== */
@@ -1573,46 +1488,7 @@
   }
   function playTripSound(v) {
     if (!ensureAudio() || !master) { stats.sounds.push(v + ':none'); return; }
-    
-  function soundAmbulance() {
-    var d = TRIP_MS.ambulance / 1000, t0 = ctx.currentTime + 0.03, nodes = [];
-    var pan = ctx.createStereoPanner ? ctx.createStereoPanner() : ctx.createGain();
-    if (pan.pan) { pan.pan.setValueAtTime(-0.9, t0); pan.pan.linearRampToValueAtTime(0, t0 + 1.25); pan.pan.setValueAtTime(0, t0 + 2.4); pan.pan.linearRampToValueAtTime(0.9, t0 + d); }
-    pan.connect(master); nodes.push(pan);
-    var sg = ctx.createGain(); env(sg, t0, [[0.05, 0.18], [d - 0.45, 0.18], [d, 0.0001]]); sg.connect(pan);
-    var sl = ctx.createBiquadFilter(); sl.type = 'lowpass'; sl.frequency.value = 2600; sl.connect(sg);
-    var so = ctx.createOscillator(); so.type = 'square'; var s2 = ctx.createOscillator(); s2.type = 'sawtooth'; var s2g = ctx.createGain(); s2g.gain.value = 0.3;
-    for (var t = 0, i = 0; t < d; t += 0.36, i++) {
-      var dop = t < 1.2 ? 1.04 : (t > 2.5 ? 0.96 : 1), f = (i % 2 ? 660 : 880) * dop;
-      so.frequency.setTargetAtTime(f, t0 + t, 0.01); s2.frequency.setTargetAtTime(f * 2, t0 + t, 0.01);
-    }
-    so.connect(sl); s2.connect(s2g); s2g.connect(sl); so.start(t0); so.stop(t0 + d + 0.05); s2.start(t0); s2.stop(t0 + d + 0.05);
-    nodes.push(sg, sl, so, s2, s2g);
-    var rpm = [[0, 38], [0.9, 58], [1.3, 32], [2.35, 30], [2.6, 55], [d, 72]];
-    var eg = ctx.createGain(); env(eg, t0, [[0.1, 0.2], [1.3, 0.14], [2.35, 0.14], [2.7, 0.22], [d, 0.0001]]); eg.connect(pan);
-    var el = ctx.createBiquadFilter(); el.type = 'lowpass'; el.frequency.value = 300; el.connect(eg);
-    var eo = ctx.createOscillator(); eo.type = 'sawtooth'; follow(eo.frequency, t0, rpm, function (r) { return r; });
-    eo.connect(el); eo.start(t0); eo.stop(t0 + d + 0.05); nodes.push(eg, el, eo); cleanup(nodes, d);
-  }
-  function soundTaxi() {
-    var d = TRIP_MS.taxi / 1000, t0 = ctx.currentTime + 0.03, nodes = [];
-    var pan = ctx.createStereoPanner ? ctx.createStereoPanner() : ctx.createGain();
-    if (pan.pan) { pan.pan.setValueAtTime(-0.85, t0); pan.pan.linearRampToValueAtTime(0, t0 + 1.1); pan.pan.setValueAtTime(0, t0 + 2.1); pan.pan.linearRampToValueAtTime(0.9, t0 + d); }
-    pan.connect(master); nodes.push(pan);
-    var rpm = [[0, 40], [0.8, 62], [1.15, 34], [2.1, 34], [2.3, 58], [d, 78]];
-    var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 2; follow(lp.frequency, t0, rpm, function (r) { return 200 + r * 8; });
-    var eg = ctx.createGain(); env(eg, t0, [[0.2, 0.42], [1.1, 0.3], [2.1, 0.28], [2.5, 0.48], [d - 0.05, 0.0001]]);
-    lp.connect(eg); eg.connect(pan); nodes.push(lp, eg);
-    var o = ctx.createOscillator(); o.type = 'sawtooth'; follow(o.frequency, t0, rpm, function (r) { return r; });
-    o.connect(lp); o.start(t0); o.stop(t0 + d + 0.05); nodes.push(o);
-    [1.4, 1.65].forEach(function (th, i) {
-      var g = ctx.createGain(), len = i ? 0.28 : 0.16; env(g, t0 + th, [[0.02, 0.2], [len, 0.0001]]);
-      var f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 2000; f.connect(g); g.connect(master); nodes.push(g, f);
-      [349, 440].forEach(function (hz) { var oo = ctx.createOscillator(); oo.type = 'square'; oo.frequency.value = hz; oo.connect(f); oo.start(t0 + th); oo.stop(t0 + th + len + 0.05); nodes.push(oo); });
-    });
-    cleanup(nodes, d);
-  }
-    try { ({ plane: soundPlane, mtr: soundMtr, bus: soundBus, moto: soundMoto, fire: soundFire, ferry: soundFerry, ambulance: soundAmbulance, taxi: soundTaxi })[v](); stats.sounds.push(v); } catch (e) { stats.sounds.push(v + ':error'); }
+    try { ({ plane: soundPlane, mtr: soundMtr, bus: soundBus, moto: soundMoto, fire: soundFire, ferry: soundFerry })[v](); stats.sounds.push(v); } catch (e) { stats.sounds.push(v + ':error'); }
   }
   function playDing() {   // short "listening again" chime
     if (!ensureAudio() || !master) return;
@@ -1624,13 +1500,13 @@
   }
 
   /* ---- pre-recorded Cantonese voice clips (edge-tts zh-HK-HiuGaaiNeural, same voice/settings as the colour game) ----
-     The question, the tap-a-picture / intro names (飛機 / 地鐵 / 巴士 / 電單車 / 消防車 / 渡輪 + English airplane / train / Bus / Motorbike / Fire truck / Ferry) and the goodbye
+     The question, the tap-a-picture / intro names (飛機 / 地鐵 / 巴士 / 電單車 / 消防车 / 渡輪 + English airplane / train / Bus / Motorbike / Fire truck / Ferry) and the goodbye
      (home-byebye.mp3 = 「到屋企啦，bye bye！」, byebye-zh.mp3 = 「Bye bye！」). Fetched at load, decoded into the Web Audio
      context that the Start tap creates (so iOS lets them play). speechSynthesis is only a fallback if a clip can't load.
      (byebye.wav, the old Piper child voice, is kept in the folder but no longer used.) */
   var CLIP_FILES = { home: 'home-byebye.mp3', bye: 'byebye-zh.mp3', prompt: 'prompt.mp3', tapPrompt: 'tap-prompt.mp3',
-    plane: 'name-plane.mp3', mtr: 'name-mtr.mp3', bus: 'name-bus.mp3', moto: 'name-moto.mp3', fire: 'name-fire.mp3', ferry: 'name-ferry.mp3', ambulance: 'name-ambulance.mp3', taxi: 'name-taxi.mp3',
-    'plane-en': 'name-plane-en.mp3', 'mtr-en': 'name-mtr-en.mp3', 'bus-en': 'name-bus-en.mp3', 'moto-en': 'name-moto-en.mp3', 'fire-en': 'name-fire-en.mp3', 'ferry-en': 'name-ferry-en.mp3', 'ambulance-en': 'name-ambulance-en.mp3', 'taxi-en': 'name-taxi-en.mp3',
+    plane: 'name-plane.mp3', mtr: 'name-mtr.mp3', bus: 'name-bus.mp3', moto: 'name-moto.mp3', fire: 'name-fire.mp3', ferry: 'name-ferry.mp3',
+    'plane-en': 'name-plane-en.mp3', 'mtr-en': 'name-mtr-en.mp3', 'bus-en': 'name-bus-en.mp3', 'moto-en': 'name-moto-en.mp3', 'fire-en': 'name-fire-en.mp3', 'ferry-en': 'name-ferry-en.mp3',
     blockedUnsupported: 'help-unsupported.mp3', blockedDenied: 'help-denied.mp3', blockedService: 'help-service.mp3', blockedNomic: 'help-nomic.mp3' };
   var APP_VERSION = (document.querySelector('meta[name="app-version"]') || {}).content || '';
   var BYE_CLIPS = { home: { say: '到屋企啦，拜拜！' }, bye: { say: '拜拜！' } };
@@ -1876,37 +1752,7 @@
     if (!best) return;
     if (!bestFinal && best.atEnd && PREFIX_OF_OTHER[best.word]) {   // e.g. interim 「機…」 may still become 「機車」
       var r = rec.inst, b = best, t = said;
-      rec.holdTimer = setTimeout(function () {
-        if (rec.inst !== r || state.screen !== 'cover' || speaking) return;
-        if (state.choices && state.target) {
-          if (b.v === state.target) { state.quizArmed = false; clearQuizTimer(); markMentioned(b.v); stats.matches.push(b); startTrip(b.v, t); }
-          else if (state.choices.indexOf(b.v) >= 0) { markMentioned(b.v); stats.ignored.push('distractor-mentioned:' + b.v); }
-          else stats.ignored.push('outside-trio:' + b.v);
-          return;
-        }
-        stats.matches.push(b); startTrip(b.v, t);
-      }, HOLD_PREFIX_MS);
-      return;
-    }
-    // Quiz voice rules:
-    //  - naming the TARGET → child-mentioned + trip
-    //  - naming a DISTRACTOR among the three → child-mentioned that vehicle, no trip, keep listening in the 7s window
-    //  - naming something outside the three → ignore (7s silence-style timeout still advances with no teach-back)
-    if (state.choices && state.target) {
-      if (best.v === state.target) {
-        state.quizArmed = false; clearQuizTimer();
-        markMentioned(best.v);
-        stats.matches.push(best); startTrip(best.v, said);
-        return;
-      }
-      if (state.choices.indexOf(best.v) >= 0) {
-        markMentioned(best.v);   // distractor named by child — counts toward completion, no trip
-        stats.ignored.push('distractor-mentioned:' + best.v);
-        heard.textContent = said;
-        return;                  // keep listening until correct / tap / 7s
-      }
-      stats.ignored.push('outside-trio:' + best.v);
-      heard.textContent = said;
+      rec.holdTimer = setTimeout(function () { if (rec.inst === r && state.screen === 'cover' && !speaking) { stats.matches.push(b); startTrip(b.v, t); } }, HOLD_PREFIX_MS);
       return;
     }
     stats.matches.push(best); startTrip(best.v, said);
@@ -1956,105 +1802,23 @@
     if (!srStart(true)) showBlocked('unsupported');
   });
 
-  function shuffle(arr) {
-    arr = arr.slice();
-    for (var i = arr.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1)), tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
-    }
-    return arr;
-  }
-  function tilesList() { return document.querySelector('.tiles'); }
   function clearIntroFocus() {
-    tiles.forEach(function (t) { t.classList.remove('intro-focus', 'intro-dim', 'teach-focus'); });
+    tiles.forEach(function (t) { t.classList.remove('intro-focus', 'intro-dim'); });
   }
-  function clearQuizTimer() { if (state.quizTimer) { clearTimeout(state.quizTimer); state.quizTimer = 0; } }
-  function showAllTilesBoard() {
-    var list = tilesList();
-    if (list) list.classList.remove('choice-trio', 'intro-solo');
-    tiles.forEach(function (t) { t.parentElement.classList.remove('choice-a', 'choice-b', 'choice-c', 'choice-hidden', 'intro-solo-slot'); });
-    clearIntroFocus();
-  }
-  function markMentioned(v) {
-    if (!v || state.mentioned.indexOf(v) >= 0) return;
-    state.mentioned.push(v); stats.mentioned = state.mentioned.slice();
-    state.rounds = state.mentioned.length;
-  }
-  function unmentioned() { return VEHICLES.filter(function (v) { return state.mentioned.indexOf(v) < 0; }); }
-  function allMentioned() { return state.mentioned.length >= VEHICLES.length; }
-  // Quiz trio: prefer unmentioned target; exclude already-mentioned from choices when enough remain.
-  function pickChoiceTrio() {
-    var need = unmentioned();
-    var pool = need.length ? need : VEHICLES.slice();
-    var target = shuffle(pool)[0];
-    var restPool = VEHICLES.filter(function (v) { return v !== target; });
-    // Prefer distractors that are also unmentioned, then fill from the rest.
-    var pref = shuffle(restPool.filter(function (v) { return state.mentioned.indexOf(v) < 0; }));
-    var fill = shuffle(restPool.filter(function (v) { return state.mentioned.indexOf(v) >= 0; }));
-    var distractors = pref.concat(fill).slice(0, Math.min(2, restPool.length));
-    var choices = shuffle([target].concat(distractors));
-    state.target = target; state.choices = choices; state.quizArmed = false;
-    var list = tilesList();
-    if (list) { list.classList.remove('intro-solo'); list.classList.add('choice-trio'); }
-    var slots = ['choice-a', 'choice-b', 'choice-c'];
-    tiles.forEach(function (t) {
-      var li = t.parentElement, v = t.getAttribute('data-v'), at = choices.indexOf(v);
-      li.classList.remove('choice-a', 'choice-b', 'choice-c', 'choice-hidden', 'intro-solo-slot');
-      if (at < 0) li.classList.add('choice-hidden'); else li.classList.add(slots[at]);
-    });
-    clearIntroFocus();
-    stats.trios.push({ target: target, choices: choices.slice() });
-    return { target: target, choices: choices };
-  }
-  // Teach-back: figure speaks ITS OWN zh then en (highlight must match). Tap path only — not silence/wrong.
-  function teachName(v, done) {
-    if (!v || !SAY_NAME[v]) { if (done) done(); return; }
-    clearIntroFocus();
-    tiles.forEach(function (t) {
-      var mine = t.getAttribute('data-v') === v;
-      t.classList.toggle('teach-focus', mine); t.classList.toggle('intro-dim', !mine && !!state.choices);
-    });
-    var focused = document.querySelector('.tile.teach-focus');
-    if (!focused || focused.getAttribute('data-v') !== v) { clearIntroFocus(); if (done) done(); return; }
-    stats.teaches.push(v);
-    announce(zh(SAY_NAME[v]) + ' ' + en(SAY_EN[v]));
-    say(SAY_NAME[v], { rate: 0.9, pitch: 1.25, clip: v }, function () {
-      var still = document.querySelector('.tile.teach-focus');
-      if (!still || still.getAttribute('data-v') !== v) { clearIntroFocus(); if (done) done(); return; }
-      say(SAY_EN[v], { lang: 'en', rate: 0.9, pitch: 1.3, clip: v + '-en' }, function () {
-        clearIntroFocus(); if (done) done();
-      });
-    });
-  }
-  function advanceAfterQuestion() {
-    state.quizArmed = false; clearQuizTimer();
-    state.target = null; state.choices = null;
-    if (allMentioned()) goToGoodbye();
-    else goToCover({ after: true });
-  }
-  // Opening: ONE vehicle visible at a time, random order; same id for art + zh + en.
+  // First open: each vehicle pops into focus and says its Cantonese name, then its English name (Happy Colors pattern).
   function runNameIntro(done) {
-    var order = shuffle(VEHICLES);
-    state.introOrder = order.slice(); stats.introOrder = order.slice(); stats.introSteps = [];
-    var i = 0, list = tilesList();
-    if (list) { list.classList.remove('choice-trio'); list.classList.add('intro-solo'); }
+    var i = 0;
     function next() {
-      if (state.screen !== 'cover') { showAllTilesBoard(); return; }
-      if (i >= order.length) { showAllTilesBoard(); if (done) done(); return; }
-      var v = order[i++];
+      if (state.screen !== 'cover') { clearIntroFocus(); return; }
+      if (i >= VEHICLES.length) { clearIntroFocus(); if (done) done(); return; }
+      var v = VEHICLES[i++];
       tiles.forEach(function (t) {
-        var li = t.parentElement, mine = t.getAttribute('data-v') === v;
-        li.classList.remove('choice-a', 'choice-b', 'choice-c', 'intro-solo-slot');
-        if (mine) { li.classList.remove('choice-hidden'); li.classList.add('intro-solo-slot'); t.classList.add('intro-focus'); t.classList.remove('intro-dim'); }
-        else { li.classList.add('choice-hidden'); t.classList.remove('intro-focus'); }
+        var mine = t.getAttribute('data-v') === v;
+        t.classList.toggle('intro-focus', mine); t.classList.toggle('intro-dim', !mine);
       });
-      var focused = document.querySelector('.tile.intro-focus');
-      if (!focused || focused.getAttribute('data-v') !== v) { showAllTilesBoard(); return; }
-      stats.introSteps.push({ v: v, zh: SAY_NAME[v], en: SAY_EN[v] });
       announce(zh(SAY_NAME[v]) + ' ' + en(SAY_EN[v]));
       say(SAY_NAME[v], { rate: 0.9, pitch: 1.25, clip: v }, function () {
-        if (state.screen !== 'cover') { showAllTilesBoard(); return; }
-        var still = document.querySelector('.tile.intro-focus');
-        if (!still || still.getAttribute('data-v') !== v) { showAllTilesBoard(); return; }
+        if (state.screen !== 'cover') { clearIntroFocus(); return; }
         say(SAY_EN[v], { lang: 'en', rate: 0.9, pitch: 1.3, clip: v + '-en' }, function () {
           tripTimers.push(setTimeout(next, 280));
         });
@@ -2062,50 +1826,27 @@
     }
     next();
   }
-  function armQuizMissTimer() {
-    clearQuizTimer();
-    state.quizArmed = true;
-    // Silence OR speech that matches none of the three: after 7s → next question, NO teach-back names.
-    state.quizTimer = setTimeout(function () {
-      if (state.screen !== 'cover' || !state.quizArmed) return;
-      state.quizArmed = false; unlisten(); stopSpeaking();
-      advanceAfterQuestion();
-    }, QUIZ_MISS_MS);
-  }
-  function askTarget() {
-    if (state.screen !== 'cover') return;
-    if (allMentioned()) { goToGoodbye(); return; }
-    var trio = pickChoiceTrio(), v = trio.target;
-    announce(zh('邊個係' + SAY_NAME[v] + '呀？') + ' ' + en('Which one is the ' + SAY_EN[v] + '?'));
-    say(SAY_NAME[v], { rate: 0.9, pitch: 1.25, clip: v }, function () {
-      if (state.screen !== 'cover') return;
-      armQuizMissTimer();
-      listen(false);
-    });
-  }
   function goToCover(opts) {
     opts = opts || {};
-    clearTripTimers(); clearQuizTimer(); cancelAllHolds(); againDialog.close(true); clearIntroFocus();
-    state.screen = 'cover'; state.vehicle = null; state.quizArmed = false;
+    clearTripTimers(); cancelAllHolds(); againDialog.close(true); clearIntroFocus();
+    state.screen = 'cover'; state.vehicle = null;
     show(cover); stage.hidden = true; document.body.classList.remove('tripping');
     tiles.forEach(function (t) { t.classList.remove('chosen'); });
-    if (opts.first || opts.reset) {
-      heard.textContent = ''; focusEl(coverTitle);
-      state.mentioned = []; state.target = null; state.choices = null; state.rounds = 0;
-      stats.mentioned = []; showAllTilesBoard();
-    }
+    if (opts.first || opts.reset) { heard.textContent = ''; focusEl(coverTitle); }
     if (state.mode === 'voice' && state.needTap) { talkBtn.hidden = false; updateIndicator(); return; }
     talkBtn.hidden = true;
-    var startQuestion = function () {
+    var afterSpeech = function () { if (state.screen === 'cover') listen(false); };
+    var ask = function () {
       if (state.screen !== 'cover') return;
-      if (state.mode === 'tap') { pickChoiceTrio(); say(TAP_PROMPT, { clip: 'tapPrompt' }); }
-      else askTarget();
+      if (state.mode === 'tap') say(TAP_PROMPT, { clip: 'tapPrompt' });
+      else say(PROMPT, { clip: 'prompt' }, afterSpeech);
     };
-    var delay = opts.first || opts.reset ? 700 : 150;
+    // Speak the question (not listening meanwhile), then listen. On first open (and Play again), name every vehicle zh→en first.
+    var delay = opts.first || opts.reset ? 700 : 150;   // let VoiceOver read the heading first
     tripTimers.push(setTimeout(function () {
       if (state.screen !== 'cover') return;
-      if ((opts.first || opts.reset) && state.mode === 'voice') runNameIntro(startQuestion);
-      else startQuestion();
+      if ((opts.first || opts.reset) && state.mode === 'voice') runNameIntro(ask);
+      else ask();
     }, delay));
     updateIndicator();
   }
@@ -2114,9 +1855,8 @@
   function clearTripTimers() { tripTimers.forEach(clearTimeout); tripTimers = []; }
   function startTrip(v, said) {
     if (state.screen !== 'cover' || state.mode !== 'voice') return;
-    unlisten(); stopSpeaking(); clearTripTimers(); clearQuizTimer(); state.quizArmed = false;
-    state.screen = 'trip'; state.vehicle = v;
-    markMentioned(v);
+    unlisten(); stopSpeaking(); clearTripTimers();       // stop recognition during the trip
+    state.screen = 'trip'; state.vehicle = v; state.rounds++;
     stats.trips.push({ v: v, said: said || '' });
     tiles.forEach(function (t) { t.classList.toggle('chosen', t.getAttribute('data-v') === v); });
     document.body.classList.add('tripping');
@@ -2130,26 +1870,18 @@
   function endTrip() {
     if (state.screen !== 'trip') return;
     stage.hidden = true; stage.removeAttribute('data-v');
-    state.target = null; state.choices = null;
-    if (allMentioned()) goToGoodbye(); else goToCover({ after: true });
+    if (state.rounds >= ROUNDS_TO_END) goToGoodbye(); else goToCover({ after: true });
   }
 
-  // Quiz tap: tapped figure speaks zh+en, then next question. Tap does NOT mark mentioned-by-child and never starts a trip.
+  // Tapping a picture only says its name (no animation, no sound effect, not a round).
   tiles.forEach(function (t) {
     t.addEventListener('click', function () {
       if (state.screen !== 'cover') return;
       ensureAudio();
       var v = t.getAttribute('data-v');
       stats.tapsSpoken.push(v);
-      if (state.choices && state.quizArmed) {
-        if (state.choices.indexOf(v) < 0) return;
-        state.quizArmed = false; clearQuizTimer();
-        srAbort(); clearTripTimers(); unlisten(); stopSpeaking();
-        teachName(v, advanceAfterQuestion);
-        return;
-      }
       var wasListening = state.mode === 'voice' && !state.needTap;
-      srAbort(); clearTripTimers();
+      srAbort(); clearTripTimers();                       // pause listening so the game doesn't hear its own voice
       say(SAY_NAME[v], { rate: 0.9, pitch: 1.25, clip: v }, function () { if (wasListening && state.screen === 'cover') listen(false); });
     });
   });
@@ -2282,11 +2014,11 @@
 
   /* ---------- test / debug hook (read-only) ---------- */
   window.SayAndGo = {
-    APP_NAME: APP_NAME, TRIP_MS: TRIP_MS, ROUNDS_TO_END: ROUNDS_TO_END, HOLD_MS: HOLD_MS, WORDS: WORDS, LANGS: LANGS, SAY_NAME: SAY_NAME, SAY_EN: SAY_EN, VEHICLES: VEHICLES, shuffle: shuffle, pickChoiceTrio: pickChoiceTrio, teachName: teachName, markMentioned: markMentioned,
+    APP_NAME: APP_NAME, TRIP_MS: TRIP_MS, ROUNDS_TO_END: ROUNDS_TO_END, HOLD_MS: HOLD_MS, WORDS: WORDS, LANGS: LANGS, SAY_NAME: SAY_NAME, SAY_EN: SAY_EN, VEHICLES: VEHICLES,
     match: matchVehicle, matchDetail: matchDetail, normalise: normalise, babyVariants: babyVariants,
     matchExact: function (t) { return matchExact(t).best; }, vowelMatch: function (t) { return vowelMatch(normalise(t), []); }, finalsOf: finalsOf, VOWEL_NAMES: VOWEL_NAMES, VOWEL_SKIP: VOWEL_SKIP,
     getState: function () {
-      return { screen: state.screen, mode: state.mode, rounds: state.rounds, vehicle: state.vehicle, target: state.target, choices: state.choices && state.choices.slice(), mentioned: state.mentioned.slice(), introOrder: state.introOrder && state.introOrder.slice(), introSteps: (stats.introSteps || []).slice(), trios: (stats.trios || []).slice(), teaches: (stats.teaches || []).slice(), quizArmed: !!state.quizArmed, blockedKind: state.blockedKind,
+      return { screen: state.screen, mode: state.mode, rounds: state.rounds, vehicle: state.vehicle, blockedKind: state.blockedKind,
         needTap: state.needTap, talkReason: state.talkReason || null, talkVisible: !talkBtn.hidden, speaking: speaking,
         listening: rec.running, recActive: !!rec.inst, lang: rec.lang, starts: rec.starts, granted: rec.granted, lastError: rec.lastError,
         langs: LANGS.slice(), matches: stats.matches.slice(), trips: stats.trips.slice(), sounds: stats.sounds.slice(), tapsSpoken: stats.tapsSpoken.slice(), heard: stats.heard.slice(),
