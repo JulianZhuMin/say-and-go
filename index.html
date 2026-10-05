@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Say &amp; Go 嗌到我就出發</title>
 <meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」、「消防車」、「渡輪」、「救傷車」或者「的士」，或者講個英文名，睇佢出發！ Say airplane, train, bus, Motorbike, Fire truck, Ferry, ambulance or taxi.">
-<meta name="app-version" content="2026-10-05r-ferry-horn">
+<meta name="app-version" content="2026-10-05s-ferry-horn">
 <meta name="theme-color" content="#4dabf7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -487,19 +487,19 @@
 
 
   /* Ferry (渡輪): Hong Kong Star Ferry–class double-deck harbour ferry sails across Victoria Harbour */
-  .scene-ferry { background: linear-gradient(180deg, rgba(116,192,252,.45) 0%, rgba(165,216,255,.2) 35%, rgba(102,197,204,.35) 55%, rgba(56,160,180,.55) 100%); animation-duration: 5.2s; }
+  .scene-ferry { background: linear-gradient(180deg, rgba(116,192,252,.45) 0%, rgba(165,216,255,.2) 35%, rgba(102,197,204,.35) 55%, rgba(56,160,180,.55) 100%); animation-duration: 6.0s; }
   .scene-ferry .harbour-skyline { position: absolute; left: 0; right: 0; bottom: 38vh; height: 18vh;
     background: repeating-linear-gradient(90deg, #868e96 0 3vmin, #495057 3vmin 5vmin, #adb5bd 5vmin 7.5vmin, #343a40 7.5vmin 9vmin);
     clip-path: polygon(0 100%, 0 55%, 4% 40%, 8% 60%, 12% 35%, 18% 55%, 22% 30%, 28% 50%, 34% 25%, 40% 48%, 46% 32%, 52% 45%, 58% 28%, 64% 52%, 70% 35%, 76% 48%, 82% 30%, 88% 55%, 94% 38%, 100% 50%, 100% 100%);
     opacity: .85; }
   .scene-ferry .water { position: absolute; left: 0; right: 0; bottom: 0; height: 38vh; background: linear-gradient(180deg, #66d9e8 0%, #22b8cf 40%, #1098ad 100%); }
-  .scene-ferry .wave { position: absolute; left: -10%; right: -10%; height: 3.5vh; background: repeating-linear-gradient(90deg, transparent 0 4vmin, rgba(255,255,255,.35) 4vmin 8vmin); border-radius: 50%; animation: ferry-wave 5.2s linear both; }
+  .scene-ferry .wave { position: absolute; left: -10%; right: -10%; height: 3.5vh; background: repeating-linear-gradient(90deg, transparent 0 4vmin, rgba(255,255,255,.35) 4vmin 8vmin); border-radius: 50%; animation: ferry-wave 6.0s linear both; }
   .scene-ferry .wave.w1 { bottom: 28vh; opacity: .7; } .scene-ferry .wave.w2 { bottom: 18vh; animation-delay: .3s; opacity: .55; } .scene-ferry .wave.w3 { bottom: 8vh; animation-delay: .55s; opacity: .4; }
   @keyframes ferry-wave { from { translate: 0 0; } to { translate: -8vw 0; } }
   .mover-ferry {
     position: absolute; left: -40%; bottom: 14vh;
     width: min(78vmin, 620px); height: calc(min(78vmin, 620px) * 160 / 280);
-    animation: ferry-sail 5.2s ease-in-out both;
+    animation: ferry-sail 6.0s ease-in-out both;
     filter: drop-shadow(0 1.5vmin 1vmin rgba(0,0,0,.22));
   }
   @keyframes ferry-sail {
@@ -509,7 +509,7 @@
     52%  { left: 34%;  bottom: 16vh; transform: rotate(0.6deg); }
     100% { left: 108%; bottom: 14vh; transform: rotate(1.2deg); }
   }
-  #stage .ferry-bob { width: 100%; height: 100%; animation: ferry-bob 5.2s ease-in-out both; }
+  #stage .ferry-bob { width: 100%; height: 100%; animation: ferry-bob 6.0s ease-in-out both; }
   @keyframes ferry-bob { 0%, 100% { transform: translateY(0); } 25% { transform: translateY(-4px); } 50% { transform: translateY(3px); } 75% { transform: translateY(-3px); } }
   #stage .ferry-wake { animation: puff .9s ease-out infinite; }
 
@@ -1092,7 +1092,7 @@
   'use strict';
   /* ===================== settings ===================== */
   var ROUNDS_TO_END = 6;          // 6 successful rides (6 of 8 named) → goodbye; the last 2 are never asked
-  var TRIP_MS = { plane: 3600, mtr: 4200, bus: 4200, moto: 3400, fire: 4000, ferry: 5200, ambulance: 4100, taxi: 3800 };
+  var TRIP_MS = { plane: 3600, mtr: 4200, bus: 4200, moto: 3400, fire: 4000, ferry: 6000, ambulance: 4100, taxi: 3800 };
   var HOLD_MS = 1500;             // long-press for the parent "Play again" control
   var CLICK_DEDUPE_MS = 700;
   var HOLD_PREFIX_MS = 700;       // wait for the rest of an unfinished word that could mean another vehicle
@@ -1610,7 +1610,7 @@
     cleanup(nodes, d);
   }
 
-  // FERRY: diesel rumble + water wash + two brighter, longer foghorn toots (2026-10-05r; was one short deep blast).
+  // FERRY: diesel rumble + water wash + two higher, longer foghorn toots (2026-10-05s).
   function soundFerry() {
     var d = TRIP_MS.ferry / 1000, t0 = ctx.currentTime + 0.03, nodes = [];
     var pan = ctx.createStereoPanner ? ctx.createStereoPanner() : ctx.createGain();
@@ -1627,18 +1627,17 @@
     var wg = ctx.createGain(); env(wg, t0, [[0.3, 0.12], [d - 0.2, 0.1], [d, 0.0001]]);
     var wn = noiseSrc(t0, d); wn.connect(wb); wb.connect(wg); wg.connect(pan);
     nodes.push(eg, el, eo, am, lfo, lg, wb, wg, wn);
-    // Foghorn: brighter + longer (2026-10-05r). Was one deep ~0.7s blast at ~110 Hz; now two mid-high toots.
-    // Pitch up ~a fifth (kids hear it better on phone speakers); each blast ~1.2–1.4 s.
-    [[1.35, 1.35], [3.05, 1.15]].forEach(function (blast) {
+    // Foghorn 2026-10-05s: pitch up again (~247 Hz fund) + longer blasts (~1.6–1.8 s each), still two toots.
+    [[1.2, 1.75], [3.4, 1.55]].forEach(function (blast) {
       var th = blast[0], len = blast[1];
-      var g = ctx.createGain(); env(g, t0 + th, [[0.1, 0.38], [0.55, 0.34], [len - 0.15, 0.28], [len, 0.0001]]);
-      var f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 1100; f.Q.value = 0.7;
+      var g = ctx.createGain(); env(g, t0 + th, [[0.12, 0.4], [0.7, 0.36], [len - 0.2, 0.3], [len, 0.0001]]);
+      var f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 1400; f.Q.value = 0.65;
       f.connect(g); g.connect(master); nodes.push(g, f);
-      // fundamental ~185 Hz (was 110) + brighter harmonics
-      [[185, 1], [277, 0.62], [370, 0.32], [555, 0.14]].forEach(function (h) {
+      // fundamental ~247 Hz (was 185 in r / 110 originally) + brighter harmonics for phone speakers
+      [[247, 1], [370, 0.65], [494, 0.35], [740, 0.16]].forEach(function (h) {
         var o = ctx.createOscillator(), hg = ctx.createGain();
         o.type = 'sine'; o.frequency.value = h[0]; hg.gain.value = h[1];
-        o.connect(hg); hg.connect(f); o.start(t0 + th); o.stop(t0 + th + len + 0.1); nodes.push(o, hg);
+        o.connect(hg); hg.connect(f); o.start(t0 + th); o.stop(t0 + th + len + 0.12); nodes.push(o, hg);
       });
     });
     cleanup(nodes, d);
