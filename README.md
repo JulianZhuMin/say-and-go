@@ -55,3 +55,10 @@ Locked English display names (tiles / intro): airplane, train, Bus, Motorbike, F
 - **Trip banner**: during every trip the departure line is shown big at the top, Chinese with English below (e.g. 「的士嚟喇，嘟嘟，走喇！」 / "The taxi is here. Toot toot, off we go!"). VoiceOver hears it from the live region.
 - **Animation**: every trip restarts the stage animations (reflow + restart), so the 2nd, 3rd … trip moves like the first. With Reduce Motion on, the vehicle still drives / flies across (only the small decorative loops slow down).
 - **Bilingual screen**: every Chinese line on screen has its English directly below (status pill, title, hint, start status, goodbye, dialogs, help). Portrait shows the same rotate hint as the other games: 「打橫部機，會更好玩！」 / "Turn the phone sideways — it's more fun!"
+
+## 2026-10-05v-mic-release
+
+Leaving the tab/page at any point (start, cover, quiz, trip, goodbye) fully releases SpeechRecognition /
+the microphone via `releaseMic` on pagehide, beforeunload, unload, and visibility hidden. Temporary hide
+stops the mic so other apps get clean audio; returning to an active quiz cover may restart listening.
+Parent No still goes to 星星學樂園 after releasing the mic.

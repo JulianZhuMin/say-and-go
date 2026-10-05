@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Say &amp; Go 嗌到我就出發</title>
 <meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」、「消防車」、「渡輪」、「救傷車」或者「的士」，或者講個英文名，睇佢出發！ Say airplane, train, bus, Motorbike, Fire truck, Ferry, ambulance or taxi.">
-<meta name="app-version" content="2026-10-05u-play-again-hub">
+<meta name="app-version" content="2026-10-05v-mic-release">
 <meta name="theme-color" content="#4dabf7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1944,6 +1944,19 @@
     if (srStart(gesture)) armIdle();
   }
   function unlisten() { rec.wanted = false; srAbort(); updateIndicator(); }
+  /** Full mic/SpeechRecognition release — any leave point (start/cover/quiz/trip/goodbye). Safe no-throw. */
+  function releaseMic() {
+    try {
+      rec.wanted = false;
+      clearTimeout(rec.watch); clearTimeout(rec.retryTimer); clearTimeout(rec.idleTimer); clearTimeout(rec.holdTimer);
+      srAbort();
+      if (rec.stream) {
+        try { rec.stream.getTracks().forEach(function (tr) { try { tr.stop(); } catch (e0) {} }); } catch (e1) {}
+        rec.stream = null;
+      }
+      updateIndicator();
+    } catch (e) { /* ignore */ }
+  }
   function armIdle() {
     clearTimeout(rec.idleTimer);
     rec.idleTimer = setTimeout(function () {
@@ -2461,7 +2474,7 @@
     updateIndicator();
   }
   function goToHub() {
-    byeTimers.forEach(clearTimeout); byeTimers = []; stopBye(); stopSpeaking(); unlisten();
+    byeTimers.forEach(clearTimeout); byeTimers = []; stopBye(); stopSpeaking(); releaseMic();
     try { location.assign(HUB_URL); } catch (e) { location.href = HUB_URL; }
   }
   function playAgain() {
@@ -2559,9 +2572,18 @@
   });
   document.addEventListener('contextmenu', function (e) { if (state.screen !== 'blocked') e.preventDefault(); });
   document.addEventListener('visibilitychange', function () {
-    if (document.visibilityState === 'hidden') { srAbort(); stopSpeaking(); updateIndicator(); }
-    else if (state.screen === 'cover' && state.mode === 'voice' && !state.needTap) { rec.retry = 0; listen(false); }
+    if (document.visibilityState === 'hidden') {
+      releaseMic();   // any game stage: stop mic so other apps get clean audio
+      stopSpeaking();
+    } else if (state.screen === 'cover' && state.mode === 'voice' && !state.needTap && state.quizArmed) {
+      rec.retry = 0; listen(false);
+    }
   });
+  // Close tab / swipe away Safari / navigate elsewhere at ANY point → immediate full mic release.
+  function onPageLeave() { releaseMic(); try { stopSpeaking(); } catch (e) {} }
+  window.addEventListener('pagehide', onPageLeave);
+  window.addEventListener('beforeunload', onPageLeave);
+  window.addEventListener('unload', onPageLeave);
 
   /* ---------- test / debug hook (read-only) ---------- */
   window.SayAndGo = {
