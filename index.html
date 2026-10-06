@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Say &amp; Go 嗌到我就出發</title>
 <meta name="description" content="講「飛機」、「地鐵」、「巴士」、「電單車」、「消防車」、「渡輪」、「救傷車」或者「的士」，或者講個英文名，睇佢出發！ Say airplane, train, bus, Motorbike, Fire truck, Ferry, ambulance or taxi.">
-<meta name="app-version" content="2026-10-05x-skip-intro-replay">
+<meta name="app-version" content="2026-10-06a-big-centre-mic">
 <meta name="theme-color" content="#4dabf7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -589,6 +589,11 @@
   @keyframes tilt { 0%,30% { transform: rotate(0); } 60%,100% { transform: rotate(-90deg); } }
   @media (min-aspect-ratio: 4/5) and (max-height: 520px) { #mic-ind-text { display: none; } }
   @media (orientation: portrait) { body.on-cover #rotate { display: flex; } body.on-cover.tripping #rotate, body.on-cover.talk-shown #rotate { display: none; } }
+  /* 2026-10-06a: quiz mic = big, see-through, dead centre of the play area (over the cards, never blocks taps) */
+  .play.choice-trio-play #mic-big {
+    left: 50%; top: 50%; width: clamp(150px, 42vmin, 360px); height: clamp(150px, 42vmin, 360px);
+    transform: translate(-50%, -50%); opacity: .5; z-index: 4;
+  }
 </style>
 </head>
 <body>
@@ -2065,11 +2070,11 @@
     }
     micInd.setAttribute('data-s', s); updateBigMic();
   }
-  // Big microphone picture: visible only while recognition has really begun (onstart/onaudiostart) and not ended or errored,
+  // Big microphone picture: visible as soon as the game wants to listen (2026-10-06a: no longer waits for onstart), until it errors,
   // on the cover, in voice mode, and not while the game is talking, paused or on a trip. No live region: silent for VoiceOver.
   var micErr = false;
   function updateBigMic() {
-    var on = !!rec.inst && rec.gotStart && !micErr && !rec.network && state.screen === 'cover' && state.mode === 'voice' &&
+    var on = (!!rec.inst || rec.wanted) && !micErr && !rec.network && state.screen === 'cover' && state.mode === 'voice' &&
              !speaking && !state.narrating && !!state.quizArmed && !state.needTap && !cover.hidden && document.visibilityState !== 'hidden';
     if (micBig.hidden === on) micBig.hidden = !on;
   }
