@@ -8,7 +8,7 @@ A voice game for toddlers. Say the Cantonese name of one of eight vehicles and i
 - 「電單車」 motorbike (also 電單, 摩托車, 摩托, 機車, 鐵馬): revs "vroom vroom" and zooms off
 - 「消防車」 fire truck (also 消防, 救火車, 救火, 滅火車, 嘀嘟車, 嘀嘟): flashes its lights, plays a two-tone "dee-daa" siren, stops, then drives off
 - 「渡輪」 or 「船」 ferry: a green-and-white harbour ferry sails across the water
-- 「救傷車」 ambulance
+- 「救護車」 ambulance
 - 「的士」 taxi
 
 Simplified characters work too (飞机, 地铁, 双层巴士, 电单车, 摩托车, 消防车, 救火车 …). The child is expected to answer in Chinese (recognition is Chinese-only). English Latin aliases are still accepted if dictation writes them as whole Latin words (case-insensitive; spaces ignored), e.g. plane / aeroplane / airplane, MTR / train / subway / metro, bus / double decker, motorbike / motorcycle / motor bike, fire truck / fire engine / firetruck, ferry / star ferry, ambulance, taxi / cab (and plurals). Tile/intro English display: airplane, train, Bus, Motorbike, Fire truck, Ferry, ambulance, taxi. "business" and "trainer" never count. English is not used on the vowel-matching path. Tapping a picture only says its Cantonese name.
